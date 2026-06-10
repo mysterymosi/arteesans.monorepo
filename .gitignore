@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# builds
+.next/
+dist/
+build/
+.expo/
+.turbo/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# native
+ios/
+android/
+
+# misc
+.DS_Store
+*.log
+*.pem
+
+# supabase
+supabase/.temp/
+supabase/.branches/
