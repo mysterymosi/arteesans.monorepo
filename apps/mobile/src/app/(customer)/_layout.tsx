@@ -1,18 +1,31 @@
-import { Tabs } from "expo-router";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { colors } from "@/theme";
 
 export default function CustomerLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
-      }}
+    <NativeTabs
+      tintColor={colors.primary}
+      iconColor={{ default: colors.textMuted, selected: colors.primary }}
+      labelStyle={{ default: { color: colors.textMuted }, selected: { color: colors.primary } }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home" }} />
-      <Tabs.Screen name="bookings" options={{ title: "Bookings" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
-    </Tabs>
+      <NativeTabs.Trigger name="index">
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="bookings">
+        <NativeTabs.Trigger.Label>Bookings</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "calendar", selected: "calendar" }}
+          md="event"
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "person", selected: "person.fill" }}
+          md="person"
+        />
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

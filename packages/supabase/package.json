@@ -6,7 +6,7 @@
   "types": "src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "gen-types": "supabase gen types typescript --local > src/database.types.ts"
+    "gen-types": "supabase gen types typescript --project-id cpzbnkyqigqcssqjzhoh > src/database.types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0"

@@ -1,5 +1,6 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { Text } from "./text";
 
 type ScreenHeaderProps = {
   title: string;

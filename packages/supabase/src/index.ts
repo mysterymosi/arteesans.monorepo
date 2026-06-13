@@ -1,1 +1,7 @@
-export type { Database } from "./database.types";
+export type {
+  Database,
+  Tables,
+  Enums,
+  TablesInsert,
+  TablesUpdate,
+} from "./database.types";

@@ -1,16 +1,26 @@
-/** Outfit font (loaded in root layout via @expo-google-fonts/outfit). */
+/** Outfit — embedded at build time via expo-font config plugin in app.json. */
 export const fonts = {
-  light: "Outfit_300Light",
-  regular: "Outfit_400Regular",
-  medium: "Outfit_500Medium",
-  semibold: "Outfit_600SemiBold",
+  family: "Outfit",
 } as const;
 
 export const typography = {
-  h1: { fontFamily: fonts.semibold, fontSize: 20, letterSpacing: -0.5 },
-  h2: { fontFamily: fonts.medium, fontSize: 16 },
-  body: { fontFamily: fonts.regular, fontSize: 14 },
-  bodySmall: { fontFamily: fonts.regular, fontSize: 12 },
-  label: { fontFamily: fonts.medium, fontSize: 14 },
-  caption: { fontFamily: fonts.light, fontSize: 11 },
+  h1: {
+    fontFamily: fonts.family,
+    fontSize: 20,
+    fontWeight: "600" as const,
+    letterSpacing: -0.5,
+  },
+  h2: { fontFamily: fonts.family, fontSize: 16, fontWeight: "500" as const },
+  body: { fontFamily: fonts.family, fontSize: 14, fontWeight: "400" as const },
+  bodySmall: {
+    fontFamily: fonts.family,
+    fontSize: 12,
+    fontWeight: "400" as const,
+  },
+  label: { fontFamily: fonts.family, fontSize: 14, fontWeight: "500" as const },
+  caption: {
+    fontFamily: fonts.family,
+    fontSize: 11,
+    fontWeight: "300" as const,
+  },
 } as const;

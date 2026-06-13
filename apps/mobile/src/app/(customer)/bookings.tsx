@@ -1,4 +1,5 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui";
 
 /** Placeholder — implemented from Figma (Bookings 8:2227) in Phase 2. */
 export default function Bookings() {

@@ -1,44 +1,38 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import {
-  useFonts,
-  Outfit_300Light,
-  Outfit_400Regular,
-  Outfit_500Medium,
-  Outfit_600SemiBold,
-} from "@expo-google-fonts/outfit";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { AuthProvider, useAuthSession } from "@/providers/auth-provider";
+import { QueryProvider } from "@/providers/query-provider";
 import "../global.css";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => { });
 
-export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    Outfit_300Light,
-    Outfit_400Regular,
-    Outfit_500Medium,
-    Outfit_600SemiBold,
-  });
+function SplashController() {
+  const { isLoading } = useAuthSession();
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    if (!isLoading) {
+      SplashScreen.hideAsync().catch(() => { });
     }
-  }, [fontsLoaded]);
+  }, [isLoading]);
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  return null;
+}
 
+export default function RootLayout() {
   return (
-    <>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(customer)" />
-        <Stack.Screen name="(artisan)" />
-      </Stack>
-    </>
+    <QueryProvider>
+      <AuthProvider>
+        <SplashController />
+        <StatusBar hidden />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(customer)" />
+          <Stack.Screen name="(artisan)" />
+        </Stack>
+      </AuthProvider>
+    </QueryProvider>
   );
 }

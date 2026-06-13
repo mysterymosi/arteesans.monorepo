@@ -1,5 +1,7 @@
+export { Text } from "./text";
 export { Button } from "./button";
 export { Input } from "./input";
+export { FormInput } from "./form-input";
 export { OTPInput } from "./otp-input";
 export { Card } from "./card";
 export { Badge } from "./badge";

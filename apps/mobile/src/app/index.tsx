@@ -1,9 +1,32 @@
 import { Redirect } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
+import { getPostAuthRoute } from "@/lib/auth-routing";
+import { homeRouteForRole, routes } from "@/lib/routes";
+import { useAuthProfile, useAuthSession } from "@/providers/auth-provider";
 
-/**
- * Entry gate. Phase 1 will check the Supabase session and user role,
- * then route to (customer) or (artisan). Until then, start at auth.
- */
 export default function Index() {
-  return <Redirect href="/(auth)/welcome" />;
+  const { session, isLoading } = useAuthSession();
+  const { profile, isProfileLoading } = useAuthProfile();
+
+  if (isLoading || (session && isProfileLoading)) {
+    return (
+      <View className="flex-1 items-center justify-center bg-bg">
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (!session) {
+    return <Redirect href={routes.auth.welcome} />;
+  }
+
+  if (!profile?.role || !profile.first_name || !profile.phone) {
+    return <Redirect href={getPostAuthRoute(profile)} />;
+  }
+
+  if (profile.role === "customer" || profile.role === "artisan") {
+    return <Redirect href={homeRouteForRole(profile.role)} />;
+  }
+
+  return <Redirect href={routes.auth.welcome} />;
 }

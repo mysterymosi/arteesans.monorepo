@@ -1,4 +1,5 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import { Text } from "@/components/ui";
 
 /** Placeholder — implemented from Figma (Profile 36:3958) in Phase 1. */
 export default function ArtisanProfile() {
