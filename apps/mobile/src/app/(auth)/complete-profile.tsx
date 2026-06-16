@@ -4,9 +4,8 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { type ProfileCompletion, type UserRole } from "@arteesans/shared";
 import { Button, FormInput, Text } from "@/components/ui";
-import { useCompleteProfileMutation } from "@/hooks/use-auth-mutations";
+import { getPostAuthRoute, useCompleteProfileMutation } from "@/features/auth";
 import { profileFormResolver } from "@/lib/form-resolvers";
-import { getPostAuthRoute } from "@/lib/auth-routing";
 import { routes } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
 

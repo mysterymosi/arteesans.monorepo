@@ -38,9 +38,9 @@ npx eas init        # links the project, writes projectId into app.json
 
 iOS push uses APNs via EAS credentials (`npx eas credentials` → iOS).
 
-## Google Maps — TODO
+## Google Maps / Places
 
-1. Enable Maps SDK for Android/iOS + Geocoding API in Google Cloud Console
+1. Enable **Places API** and **Geocoding API** in Google Cloud Console
 2. Put the key in `apps/mobile/.env` as `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
 
 ## Environment files

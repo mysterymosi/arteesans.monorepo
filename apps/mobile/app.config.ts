@@ -1,0 +1,77 @@
+import type { ExpoConfig } from "expo/config";
+
+const config: ExpoConfig = {
+  name: "Arteesans",
+  slug: "arteesans",
+  version: "1.0.0",
+  orientation: "portrait",
+  icon: "./assets/images/logo.png",
+  scheme: "arteesans",
+  userInterfaceStyle: "automatic",
+  ios: {
+    icon: "./assets/images/logo.png",
+    bundleIdentifier: "com.arteesans.app",
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    adaptiveIcon: {
+      backgroundColor: "#E6F4FE",
+      foregroundImage: "./assets/images/android-icon-foreground.png",
+      backgroundImage: "./assets/images/android-icon-background.png",
+      monochromeImage: "./assets/images/android-icon-monochrome.png",
+    },
+    predictiveBackGestureEnabled: false,
+  },
+  web: {
+    output: "static",
+    favicon: "./assets/images/logo.png",
+  },
+  plugins: [
+    "expo-router",
+    [
+      "expo-font",
+      {
+        fonts: [
+          "./assets/fonts/Outfit_300Light.ttf",
+          "./assets/fonts/Outfit_400Regular.ttf",
+          "./assets/fonts/Outfit_500Medium.ttf",
+          "./assets/fonts/Outfit_600SemiBold.ttf",
+        ],
+      },
+    ],
+    [
+      "expo-splash-screen",
+      {
+        backgroundColor: "#232323",
+        image: "./assets/images/logo.png",
+        dark: {
+          image: "./assets/images/logo.png",
+          backgroundColor: "#000000",
+        },
+        imageWidth: 200,
+      },
+    ],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "Arteesans uses your location to set your service address and find nearby artisans.",
+      },
+    ],
+  ],
+  experiments: {
+    typedRoutes: true,
+    reactCompiler: true,
+  },
+  extra: {
+    router: {},
+    eas: {
+      projectId: "772a3f19-ca66-4e70-85c0-a65614360442",
+    },
+  },
+  owner: "okimmosi",
+};
+
+export default config;

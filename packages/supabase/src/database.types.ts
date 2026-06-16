@@ -24,7 +24,7 @@ export type Database = {
           line1: string
           line2: string | null
           location: unknown
-          state: string
+          state: string | null
           user_id: string
         }
         Insert: {
@@ -36,7 +36,7 @@ export type Database = {
           line1: string
           line2?: string | null
           location?: unknown
-          state: string
+          state?: string | null
           user_id: string
         }
         Update: {
@@ -48,7 +48,7 @@ export type Database = {
           line1?: string
           line2?: string | null
           location?: unknown
-          state?: string
+          state?: string | null
           user_id?: string
         }
         Relationships: [

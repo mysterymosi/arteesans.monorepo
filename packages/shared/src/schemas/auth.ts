@@ -25,7 +25,9 @@ export const signUpSchema = z
     lastName: z.string().trim().min(2, "Last name is required"),
     email: emailSchema,
     phone: phoneSchema,
-    location: z.string().trim().min(3, "Enter your address"),
+    location: z.string().trim().min(5, "Enter your address"),
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
     password: passwordSchema,
     confirmPassword: z.string(),
     role: z.enum(USER_ROLES).exclude(["admin"]),
@@ -36,6 +38,10 @@ export const signUpSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
+  })
+  .refine((data) => data.latitude !== undefined && data.longitude !== undefined, {
+    path: ["location"],
+    message: "Select an address from the suggestions or use GPS",
   });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;

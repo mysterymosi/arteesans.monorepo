@@ -10,8 +10,7 @@ import {
 import { router } from "expo-router";
 import { loginSchema, type LoginInput } from "@arteesans/shared";
 import { Button, FormInput, Text } from "@/components/ui";
-import { useSignInMutation } from "@/hooks/use-auth-mutations";
-import { getPostAuthRoute } from "@/lib/auth-routing";
+import { useSignInMutation, getPostAuthRoute } from "@/features/auth";
 import { routes, verifyOtpRoute } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
 import { Image } from "expo-image";

@@ -9,15 +9,27 @@ import {
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
-import type { Tables } from "@arteesans/supabase";
 import type { ProfileCompletion, SignUpInput } from "@arteesans/shared";
+import {
+  resendSignUpOtp,
+  signInWithPassword,
+  signOut as signOutService,
+  signUp as signUpService,
+  verifySignUpOtp,
+} from "@/features/auth/services/auth.service";
+import {
+  completeProfile as completeProfileService,
+  fetchProfile,
+} from "@/features/auth/services/profile.service";
+import type {
+  AuthResult,
+  SignInResult,
+  SignUpResult,
+  UserProfile,
+} from "@/features/auth/types";
 import { supabase } from "@/lib/supabase";
 
-export type UserProfile = Tables<"users">;
-
-type AuthResult = { error?: string };
-type SignUpResult = AuthResult & { verified?: boolean };
-type SignInResult = AuthResult & { needsVerification?: boolean };
+export type { UserProfile };
 
 type SessionContextValue = {
   session: Session | null;
@@ -42,55 +54,6 @@ type AuthActionsContextValue = {
 const SessionContext = createContext<SessionContextValue | null>(null);
 const ProfileContext = createContext<ProfileContextValue | null>(null);
 const AuthActionsContext = createContext<AuthActionsContextValue | null>(null);
-
-async function fetchProfile(userId: string): Promise<UserProfile | null> {
-  const { data, error } = await supabase.from("users").select("*").eq("id", userId).maybeSingle();
-  if (error) {
-    throw error;
-  }
-  return data;
-}
-
-async function persistProfileFromMetadata(): Promise<string | undefined> {
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return authError?.message ?? "You are not signed in.";
-  }
-
-  const metadata = user.user_metadata ?? {};
-  const role = metadata.role === "artisan" ? "artisan" : "customer";
-
-  const { error: userError } = await supabase.from("users").upsert({
-    id: user.id,
-    role,
-    first_name: metadata.first_name ?? null,
-    last_name: metadata.last_name ?? null,
-    phone: metadata.phone ?? null,
-    email: user.email ?? null,
-  });
-
-  if (userError) {
-    return userError.message;
-  }
-
-  if (role === "customer") {
-    const { error } = await supabase
-      .from("customer_profiles")
-      .upsert({ user_id: user.id }, { onConflict: "user_id" });
-    if (error) return error.message;
-  } else {
-    const { error } = await supabase
-      .from("artisan_profiles")
-      .upsert({ user_id: user.id, address: metadata.location ?? null }, { onConflict: "user_id" });
-    if (error) return error.message;
-  }
-
-  return undefined;
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -173,114 +136,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session?.user.id]);
 
   const signUp = useCallback(async (input: SignUpInput): Promise<SignUpResult> => {
-    const { data, error } = await supabase.auth.signUp({
-      email: input.email,
-      password: input.password,
-      options: {
-        data: {
-          first_name: input.firstName,
-          last_name: input.lastName,
-          phone: input.phone,
-          location: input.location,
-          role: input.role,
-        },
-      },
-    });
-
-    if (error) {
-      return { error: error.message };
+    const result = await signUpService(input);
+    if (result.error || !result.verified || !result.userId) {
+      return result;
     }
 
-    if (data.session) {
-      const persistError = await persistProfileFromMetadata();
-      if (persistError) return { error: persistError };
-
-      const nextProfile = await fetchProfile(data.session.user.id);
-      setProfile(nextProfile);
-      setIsProfileLoading(false);
-      return { verified: true };
-    }
-
-    return { verified: false };
+    const nextProfile = await fetchProfile(result.userId);
+    setProfile(nextProfile);
+    setIsProfileLoading(false);
+    return result;
   }, []);
 
-  const verifySignUpOtp = useCallback(async (email: string, token: string): Promise<AuthResult> => {
-    let { error } = await supabase.auth.verifyOtp({ email, token, type: "signup" });
+  const verifySignUpOtpAction = useCallback(
+    async (email: string, token: string): Promise<AuthResult> => verifySignUpOtp(email, token),
+    [],
+  );
 
-    if (error) {
-      const retry = await supabase.auth.verifyOtp({ email, token, type: "email" });
-      if (retry.error) {
-        return { error: error.message };
-      }
-    }
+  const resendSignUpOtpAction = useCallback(
+    async (email: string): Promise<AuthResult> => resendSignUpOtp(email),
+    [],
+  );
 
-    const persistError = await persistProfileFromMetadata();
-    if (persistError) return { error: persistError };
-
-    return {};
-  }, []);
-
-  const resendSignUpOtp = useCallback(async (email: string): Promise<AuthResult> => {
-    const { error } = await supabase.auth.resend({ type: "signup", email });
-    if (error) {
-      return { error: error.message };
-    }
-    return {};
-  }, []);
-
-  const signInWithPassword = useCallback(
-    async (email: string, password: string): Promise<SignInResult> => {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        if (error.message.toLowerCase().includes("not confirmed")) {
-          await supabase.auth.resend({ type: "signup", email });
-          return { needsVerification: true };
-        }
-        return { error: error.message };
-      }
-
-      console.log("data", data);
-
-      return {};
-    },
+  const signInWithPasswordAction = useCallback(
+    async (email: string, password: string): Promise<SignInResult> =>
+      signInWithPassword(email, password),
     [],
   );
 
   const completeProfile = useCallback(async (input: ProfileCompletion): Promise<AuthResult> => {
+    const result = await completeProfileService(input);
+    if (result.error) {
+      return result;
+    }
+
     const {
       data: { user },
-      error: authError,
     } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return { error: authError?.message ?? "You are not signed in." };
+    if (user) {
+      const nextProfile = await fetchProfile(user.id);
+      setProfile(nextProfile);
+      setIsProfileLoading(false);
     }
 
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
-        first_name: input.firstName,
-        last_name: input.lastName,
-        phone: input.phone,
-        role: input.role,
-      },
-    });
-
-    if (updateError) {
-      return { error: updateError.message };
-    }
-
-    const persistError = await persistProfileFromMetadata();
-    if (persistError) return { error: persistError };
-
-    const nextProfile = await fetchProfile(user.id);
-    setProfile(nextProfile);
-    setIsProfileLoading(false);
-    return {};
+    return result;
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    await signOutService();
     setProfile(null);
   }, []);
 
@@ -292,13 +194,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const actionsValue = useMemo(
     () => ({
       signUp,
-      verifySignUpOtp,
-      resendSignUpOtp,
-      signInWithPassword,
+      verifySignUpOtp: verifySignUpOtpAction,
+      resendSignUpOtp: resendSignUpOtpAction,
+      signInWithPassword: signInWithPasswordAction,
       completeProfile,
       signOut,
     }),
-    [signUp, verifySignUpOtp, resendSignUpOtp, signInWithPassword, completeProfile, signOut],
+    [
+      signUp,
+      verifySignUpOtpAction,
+      resendSignUpOtpAction,
+      signInWithPasswordAction,
+      completeProfile,
+      signOut,
+    ],
   );
 
   return (

@@ -1,12 +1,15 @@
 import { Pressable, ActivityIndicator, View, type PressableProps } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@/theme";
+import { cn } from "@/lib/cn";
 import { Text } from "./text";
 
 type Variant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+type ButtonSize = "default" | "sm" | "icon";
 
 const containerStyles: Record<Variant, string> = {
-  primary: "",
+  primary: "bg-primary",
   secondary: "bg-primary-muted",
   outline: "border border-primary bg-transparent",
   ghost: "bg-transparent",
@@ -21,40 +24,108 @@ const textStyles: Record<Variant, string> = {
   danger: "text-white",
 };
 
+const sizeStyles: Record<
+  ButtonSize,
+  { container: string; text: string; radius: string; iconBox?: { width: number; height: number } }
+> = {
+  default: { container: "h-13 px-6 py-4", text: "text-base", radius: "rounded-2xl" },
+  sm: { container: "px-4 py-3", text: "text-sm", radius: "rounded-2xl" },
+  icon: { container: "", text: "", radius: "rounded-xl", iconBox: { width: 29, height: 29 } },
+};
+
 /** Figma CTA gradient (dark navy -> primary blue, left to right). */
 const PRIMARY_GRADIENT = ["#16406f", "#1e5896"] as const;
 
-type ButtonProps = PressableProps & {
-  title: string;
+type BaseButtonProps = Omit<PressableProps, "children"> & {
   variant?: Variant;
   loading?: boolean;
+  flat?: boolean;
+  iconSize?: number;
 };
 
-export function Button({ title, variant = "primary", loading, disabled, ...rest }: ButtonProps) {
-  const isDisabled = disabled || loading;
+type IconButtonProps = BaseButtonProps & {
+  size: "icon";
+  icon: number;
+  title?: string;
+  accessibilityLabel: string;
+};
 
-  const content = loading ? (
+type TextButtonProps = BaseButtonProps & {
+  size?: "default" | "sm";
+  title: string;
+  icon?: number;
+};
+
+export type ButtonProps = IconButtonProps | TextButtonProps;
+
+export function Button({
+  title,
+  variant = "primary",
+  size = "default",
+  flat = false,
+  loading,
+  disabled,
+  icon,
+  iconSize = 16,
+  className,
+  ...rest
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+  const isIconOnly = size === "icon";
+  const useGradient = variant === "primary" && !flat && size === "default";
+  const { container, text, radius, iconBox } = sizeStyles[size];
+
+  const label = loading ? (
     <ActivityIndicator
       color={variant === "primary" || variant === "danger" ? "#fff" : colors.primary}
+      size={isIconOnly ? "small" : undefined}
     />
+  ) : isIconOnly ? (
+    icon ? (
+      <Image source={icon} style={{ width: iconSize, height: iconSize }} contentFit="contain" />
+    ) : null
   ) : (
-    <Text className={`font-medium text-base ${textStyles[variant]}`}>{title}</Text>
+    <View className="flex-row items-center gap-2">
+      {icon ? (
+        <Image source={icon} style={{ width: iconSize, height: iconSize }} contentFit="contain" />
+      ) : null}
+      <Text className={cn("font-medium", text, textStyles[variant])}>{title}</Text>
+    </View>
   );
 
-  if (variant === "primary") {
+  const pressableClassName = cn(
+    !isIconOnly && "flex-row items-center justify-center overflow-hidden",
+    radius,
+    !isIconOnly && container,
+    !useGradient && containerStyles[variant],
+    isDisabled ? "opacity-50" : "active:opacity-80",
+    className,
+  );
+
+  const pressableStyle = iconBox
+    ? {
+      width: iconBox.width,
+      height: iconBox.height,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    }
+    : undefined;
+
+  if (useGradient) {
     return (
       <Pressable
         accessibilityRole="button"
         disabled={isDisabled}
-        className={`overflow-hidden rounded-2xl ${isDisabled ? "opacity-50" : "active:opacity-80"}`}
+        className={cn(
+          radius,
+          "overflow-hidden",
+          isDisabled ? "opacity-50" : "active:opacity-80",
+          className,
+        )}
         {...rest}
       >
-        <LinearGradient
-          colors={PRIMARY_GRADIENT}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <View className="h-13 flex-row items-center justify-center px-6 py-4">{content}</View>
+        <LinearGradient colors={PRIMARY_GRADIENT} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+          <View className={cn("flex-row items-center justify-center", container)}>{label}</View>
         </LinearGradient>
       </Pressable>
     );
@@ -64,10 +135,11 @@ export function Button({ title, variant = "primary", loading, disabled, ...rest 
     <Pressable
       accessibilityRole="button"
       disabled={isDisabled}
-      className={`h-13 flex-row items-center justify-center rounded-2xl px-6 py-4 ${containerStyles[variant]} ${isDisabled ? "opacity-50" : "active:opacity-80"}`}
+      className={pressableClassName}
+      style={pressableStyle}
       {...rest}
     >
-      {content}
+      {label}
     </Pressable>
   );
 }

@@ -12,7 +12,8 @@ import Checkbox from "expo-checkbox";
 import { type SignUpInput, type UserRole } from "@arteesans/shared";
 import { Button, FormInput, Text } from "@/components/ui";
 import { colors } from "@/theme";
-import { useSignUpMutation } from "@/hooks/use-auth-mutations";
+import { useSignUpMutation } from "@/features/auth";
+import { AddressPlacesAutocomplete } from "@/features/service-requests";
 import { signUpFormResolver } from "@/lib/form-resolvers";
 import { homeRouteForRole, routes, verifyOtpRoute } from "@/lib/routes";
 import { Image } from "expo-image";
@@ -33,6 +34,7 @@ export default function SignUp() {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<SignUpInput>({
     resolver: signUpFormResolver,
@@ -42,6 +44,8 @@ export default function SignUp() {
       email: "",
       phone: "",
       location: "",
+      latitude: undefined,
+      longitude: undefined,
       password: "",
       confirmPassword: "",
       role: "customer",
@@ -172,12 +176,25 @@ export default function SignUp() {
               )}
             />
 
-            <FormInput
+            <Controller
               control={control}
               name="location"
-              label="Location"
-              placeholder="address"
-              autoComplete="street-address"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <AddressPlacesAutocomplete
+                  address={value}
+                  onAddressChange={(text) => {
+                    onChange(text);
+                    setValue("latitude", undefined, { shouldValidate: true });
+                    setValue("longitude", undefined, { shouldValidate: true });
+                  }}
+                  onAddressBlur={onBlur}
+                  onCoordinatesChange={(coords) => {
+                    setValue("latitude", coords.latitude, { shouldValidate: true });
+                    setValue("longitude", coords.longitude, { shouldValidate: true });
+                  }}
+                  error={errors.location?.message}
+                />
+              )}
             />
 
             <FormInput

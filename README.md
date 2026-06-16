@@ -27,7 +27,7 @@ arteesans/
 | Backend  | Supabase (Postgres + PostGIS, Auth, Realtime, Storage)  |
 | Auth     | Email OTP via Supabase Auth + Resend SMTP               |
 | Push     | Expo Notifications + FCM                                |
-| Maps     | react-native-maps + Google Maps                         |
+| Maps     | Google Places Autocomplete + Geocoding API              |
 | Payments | Paystack (Phase 3)                                      |
 
 ## Getting started

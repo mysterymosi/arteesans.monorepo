@@ -1,5 +1,5 @@
 import type { Href } from "expo-router";
-import type { UserProfile } from "@/providers/auth-provider";
+import type { UserProfile } from "@/features/auth/types";
 import { completeProfileRoute, homeRouteForRole, routes } from "@/lib/routes";
 
 /** Returns the next route after session/profile checks. */

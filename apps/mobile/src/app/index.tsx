@@ -1,6 +1,6 @@
 import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
-import { getPostAuthRoute } from "@/lib/auth-routing";
+import { getPostAuthRoute } from "@/features/auth";
 import { homeRouteForRole, routes } from "@/lib/routes";
 import { useAuthProfile, useAuthSession } from "@/providers/auth-provider";
 

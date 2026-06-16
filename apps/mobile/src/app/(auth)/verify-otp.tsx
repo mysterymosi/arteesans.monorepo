@@ -7,8 +7,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { otpSchema } from "@arteesans/shared";
 import { Button, OTPInput, Text } from "@/components/ui";
-import { useResendOtpMutation, useVerifyOtpMutation } from "@/hooks/use-auth-mutations";
-import { getPostAuthRoute } from "@/lib/auth-routing";
+import { getPostAuthRoute, useResendOtpMutation, useVerifyOtpMutation } from "@/features/auth";
 import { routes } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
 import { Image } from "expo-image";
@@ -71,7 +70,7 @@ export default function VerifyOtp() {
       return;
     }
     if (profile?.role === "customer" || (!profile?.role && role === "customer")) {
-      router.replace(routes.customer);
+      router.replace(routes.customer.home);
       return;
     }
     router.replace(getPostAuthRoute(profile));

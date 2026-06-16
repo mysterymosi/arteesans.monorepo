@@ -13,7 +13,13 @@ export const routes = {
     roleSelect: "/(auth)/role-select",
     completeProfile: "/(auth)/complete-profile",
   },
-  customer: "/(customer)",
+  customer: {
+    home: "/(customer)",
+    bookings: "/(customer)/bookings",
+    profile: "/(customer)/profile",
+    newRequest: "/(customer)/request/new",
+    requestConfirmed: "/(customer)/request/confirmed",
+  },
   artisan: "/(artisan)",
 } as const;
 
@@ -26,5 +32,15 @@ export function completeProfileRoute(params: { role: AppRole }): Href {
 }
 
 export function homeRouteForRole(role: AppRole): Href {
-  return role === "artisan" ? routes.artisan : routes.customer;
+  return role === "artisan" ? routes.artisan : routes.customer.home;
+}
+
+export function newRequestRoute(params?: { categorySlug?: string }): Href {
+  return params?.categorySlug
+    ? { pathname: routes.customer.newRequest, params: { categorySlug: params.categorySlug } }
+    : routes.customer.newRequest;
+}
+
+export function requestConfirmedRoute(requestId: string): Href {
+  return { pathname: routes.customer.requestConfirmed, params: { requestId } };
 }
