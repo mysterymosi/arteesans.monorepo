@@ -21,6 +21,14 @@ export const routes = {
     requestConfirmed: "/(customer)/request/confirmed",
   },
   artisan: "/(artisan)",
+  artisanOnboarding: {
+    address: "/(artisan-onboarding)/address",
+    identity: "/(artisan-onboarding)/identity",
+    faceVerification: "/(artisan-onboarding)/face-verification",
+    faceScan: "/(artisan-onboarding)/face-scan",
+    faceSuccess: "/(artisan-onboarding)/face-success",
+    guarantor: "/(artisan-onboarding)/guarantor",
+  },
 } as const;
 
 export function verifyOtpRoute(params: { email: string; role?: string }): Href {

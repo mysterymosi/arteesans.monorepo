@@ -1,5 +1,5 @@
 export type { AuthResult, SignInResult, SignUpResult, UserProfile } from "./types";
-export { getPostAuthRoute, isProfileComplete } from "./lib/auth-routing";
+export { getPostAuthRoute, isProfileComplete, resolvePostAuthRoute } from "./lib/auth-routing";
 export {
   useCompleteProfileMutation,
   useResendOtpMutation,

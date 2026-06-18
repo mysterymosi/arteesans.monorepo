@@ -3,28 +3,69 @@ import { geocodeAddress } from "@/lib/geocoding";
 import { supabase } from "@/lib/supabase";
 import type { AuthResult, UserProfile } from "@/features/auth/types";
 
+type ParsedLocation = {
+  line1: string;
+  state: string | null;
+  cityLga: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
+async function parseLocationInput(
+  locationText: string,
+  coords?: { latitude: number; longitude: number },
+): Promise<ParsedLocation | null> {
+  const trimmed = locationText.trim();
+  if (!trimmed) return null;
+
+  const geocoded = await geocodeAddress(trimmed);
+
+  return {
+    line1: geocoded?.line1 ?? trimmed,
+    state: geocoded?.state ?? null,
+    cityLga: geocoded?.cityLga ?? null,
+    latitude: coords?.latitude ?? geocoded?.coords.latitude ?? null,
+    longitude: coords?.longitude ?? geocoded?.coords.longitude ?? null,
+  };
+}
+
 async function persistCustomerDefaultAddress(
   locationText: string,
   coords?: { latitude: number; longitude: number },
 ): Promise<string | undefined> {
-  const trimmed = locationText.trim();
-  if (!trimmed) return undefined;
-
-  const geocoded = await geocodeAddress(trimmed);
-  const line1 = geocoded?.line1 ?? trimmed;
-  const state = geocoded?.state ?? null;
-  const cityLga = geocoded?.cityLga ?? null;
-  const latitude = coords?.latitude ?? geocoded?.coords.latitude ?? null;
-  const longitude = coords?.longitude ?? geocoded?.coords.longitude ?? null;
+  const parsed = await parseLocationInput(locationText, coords);
+  if (!parsed) return undefined;
 
   const { error } = await supabase.rpc(
     "upsert_customer_default_address" as never,
     {
-      p_line1: line1,
-      p_state: state,
-      p_city_lga: cityLga,
-      p_latitude: latitude,
-      p_longitude: longitude,
+      p_line1: parsed.line1,
+      p_state: parsed.state,
+      p_city_lga: parsed.cityLga,
+      p_latitude: parsed.latitude,
+      p_longitude: parsed.longitude,
+    } as never,
+  );
+
+  if (error) return error.message;
+  return undefined;
+}
+
+async function persistArtisanProfileAddress(
+  locationText: string,
+  coords?: { latitude: number; longitude: number },
+): Promise<string | undefined> {
+  const parsed = await parseLocationInput(locationText, coords);
+  if (!parsed) return undefined;
+
+  const { error } = await supabase.rpc(
+    "upsert_artisan_profile_address" as never,
+    {
+      p_address: parsed.line1,
+      p_state: parsed.state,
+      p_city_lga: parsed.cityLga,
+      p_latitude: parsed.latitude,
+      p_longitude: parsed.longitude,
     } as never,
   );
 
@@ -95,11 +136,21 @@ export async function persistProfileFromMetadata(): Promise<
   } else {
     const { error } = await supabase
       .from("artisan_profiles")
-      .upsert(
-        { user_id: user.id, address: metadata.location ?? null },
-        { onConflict: "user_id" },
-      );
+      .upsert({ user_id: user.id }, { onConflict: "user_id" });
     if (error) return error.message;
+
+    const location =
+      typeof metadata.location === "string" ? metadata.location : "";
+    const latitude =
+      typeof metadata.latitude === "number" ? metadata.latitude : undefined;
+    const longitude =
+      typeof metadata.longitude === "number" ? metadata.longitude : undefined;
+    const coords =
+      latitude !== undefined && longitude !== undefined
+        ? { latitude, longitude }
+        : undefined;
+    const addressError = await persistArtisanProfileAddress(location, coords);
+    if (addressError) return addressError;
   }
 
   return undefined;

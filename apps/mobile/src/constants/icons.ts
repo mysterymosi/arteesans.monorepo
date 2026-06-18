@@ -1,4 +1,6 @@
 import arrowLeft from "@/assets/icons/arrow-left.svg";
+import chevronDown from "@/assets/icons/chevron-down.svg";
+import faceRecognition from "@/assets/icons/face-recognition.svg";
 import clean from "@/assets/icons/clean.svg";
 import electricBolt from "@/assets/icons/electric-bolt-outline.svg";
 import filter from "@/assets/icons/filter.svg";
@@ -21,6 +23,8 @@ import date from "@/assets/icons/date.svg";
 
 export const icons = {
   arrowLeft,
+  chevronDown,
+  faceRecognition,
   filter,
   home,
   logout,
