@@ -45,7 +45,7 @@ export async function resolvePostAuthRoute(
 
   if (profile.role === "artisan") {
     const onboardingComplete = await isArtisanOnboardingComplete(userId);
-    return onboardingComplete ? routes.artisan : routes.artisanOnboarding.address;
+    return onboardingComplete ? routes.artisan.home : routes.artisanOnboarding.address;
   }
 
   if (profile.role === "customer") {

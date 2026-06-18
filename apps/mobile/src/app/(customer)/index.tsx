@@ -9,10 +9,10 @@ import {
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar, Button, Text } from "@/components/ui";
+import { MenuButton } from "@/components/navigation";
 import {
   CustomerSearchBar,
   formatAddressLocationLabel,
-  MenuButton,
   useCustomerDefaultAddress,
 } from "@/features/customer";
 import {

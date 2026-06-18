@@ -1,34 +1,27 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
-import { colors } from "@/theme";
+import { Drawer } from "expo-router/drawer";
+import { ArtisanDrawerContent, type ArtisanDrawerContentProps } from "@/features/artisan";
+
+const hiddenDrawerItem = { drawerItemStyle: { display: "none" as const }, title: "" };
 
 export default function ArtisanLayout() {
   return (
-    <NativeTabs
-      tintColor={colors.primary}
-      iconColor={{ default: colors.textMuted, selected: colors.primary }}
-      labelStyle={{ default: { color: colors.textMuted }, selected: { color: colors.primary } }}
+    <Drawer
+      drawerContent={(props) => (
+        <ArtisanDrawerContent {...(props as ArtisanDrawerContentProps)} />
+      )}
+      screenOptions={{
+        headerShown: false,
+        drawerType: "front",
+        drawerStyle: { width: "78%" },
+        overlayColor: "rgba(0,0,0,0.35)",
+        swipeEdgeWidth: 48,
+      }}
     >
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Dashboard</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }}
-          md="dashboard"
-        />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="jobs">
-        <NativeTabs.Trigger.Label>Jobs</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "briefcase", selected: "briefcase.fill" }}
-          md="work"
-        />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "person", selected: "person.fill" }}
-          md="person"
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      <Drawer.Screen name="index" options={hiddenDrawerItem} />
+      <Drawer.Screen name="jobs" options={hiddenDrawerItem} />
+      <Drawer.Screen name="chat" options={hiddenDrawerItem} />
+      <Drawer.Screen name="earnings" options={hiddenDrawerItem} />
+      <Drawer.Screen name="profile" options={hiddenDrawerItem} />
+    </Drawer>
   );
 }

@@ -1,3 +1,5 @@
+import chat from "@/assets/icons/chat.svg";
+import walletMoney from "@/assets/icons/wallet-money.svg";
 import arrowLeft from "@/assets/icons/arrow-left.svg";
 import chevronDown from "@/assets/icons/chevron-down.svg";
 import faceRecognition from "@/assets/icons/face-recognition.svg";
@@ -23,6 +25,8 @@ import date from "@/assets/icons/date.svg";
 
 export const icons = {
   arrowLeft,
+  chat,
+  walletMoney,
   chevronDown,
   faceRecognition,
   filter,

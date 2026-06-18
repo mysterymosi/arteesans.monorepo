@@ -3,7 +3,11 @@ import { Image } from "expo-image";
 import { DrawerActions, useNavigation } from "expo-router/react-navigation";
 import { icons } from "@/constants/icons";
 
-export function MenuButton() {
+type MenuButtonProps = {
+  size?: number;
+};
+
+export function MenuButton({ size = 30 }: MenuButtonProps) {
   const navigation = useNavigation();
 
   return (
@@ -13,7 +17,7 @@ export function MenuButton() {
       onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
       className="h-10 w-10 items-center justify-center"
     >
-      <Image source={icons.menu} style={{ width: 16, height: 16 }} contentFit="contain" />
+      <Image source={icons.menu} style={{ width: size, height: size }} contentFit="contain" />
     </Pressable>
   );
 }

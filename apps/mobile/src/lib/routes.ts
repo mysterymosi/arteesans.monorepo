@@ -20,7 +20,13 @@ export const routes = {
     newRequest: "/(customer)/request/new",
     requestConfirmed: "/(customer)/request/confirmed",
   },
-  artisan: "/(artisan)",
+  artisan: {
+    home: "/(artisan)",
+    jobs: "/(artisan)/jobs",
+    chat: "/(artisan)/chat",
+    earnings: "/(artisan)/earnings",
+    profile: "/(artisan)/profile",
+  },
   artisanOnboarding: {
     address: "/(artisan-onboarding)/address",
     identity: "/(artisan-onboarding)/identity",
@@ -40,7 +46,7 @@ export function completeProfileRoute(params: { role: AppRole }): Href {
 }
 
 export function homeRouteForRole(role: AppRole): Href {
-  return role === "artisan" ? routes.artisan : routes.customer.home;
+  return role === "artisan" ? routes.artisan.home : routes.customer.home;
 }
 
 export function newRequestRoute(params?: { categorySlug?: string }): Href {

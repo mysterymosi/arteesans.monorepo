@@ -1,6 +1,7 @@
 import { ScrollView, View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { MenuButton } from "@/components/navigation";
 import { Text } from "@/components/ui";
 import { icons } from "@/constants/icons";
 import { cn } from "@/lib/cn";
@@ -55,7 +56,7 @@ export function ArtisanHomeDashboard({
       className="flex-1 bg-surface"
     >
       <View className="flex-row items-center justify-between">
-        <Image source={icons.menu} style={{ width: 30, height: 30 }} contentFit="contain" />
+        <MenuButton />
         <View className="flex-row items-center gap-3">
           <Image source={icons.notificationNewDot} style={{ width: 16, height: 16 }} contentFit="contain" />
           <View className="h-[30px] w-[30px] rounded-full bg-surface-muted" />
