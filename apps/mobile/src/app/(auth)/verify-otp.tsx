@@ -7,7 +7,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { otpSchema } from "@arteesans/shared";
 import { Button, OTPInput, Text } from "@/components/ui";
-import { getPostAuthRoute, useResendOtpMutation, useVerifyOtpMutation } from "@/features/auth";
+import { resolvePostAuthRoute, useResendOtpMutation, useVerifyOtpMutation } from "@/features/auth";
 import { routes } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
 import { Image } from "expo-image";
@@ -64,16 +64,12 @@ export default function VerifyOtp() {
     }
 
     const profile = await refreshProfile();
+    if (!profile) {
+      setError("code", { message: "Could not load your profile." });
+      return;
+    }
 
-    if (profile?.role === "artisan" || (!profile?.role && role === "artisan")) {
-      router.replace(routes.artisan);
-      return;
-    }
-    if (profile?.role === "customer" || (!profile?.role && role === "customer")) {
-      router.replace(routes.customer.home);
-      return;
-    }
-    router.replace(getPostAuthRoute(profile));
+    router.replace(await resolvePostAuthRoute(profile, profile.id));
   });
 
   async function handleResend() {

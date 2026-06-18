@@ -13,6 +13,8 @@ const config: ExpoConfig = {
     bundleIdentifier: "com.arteesans.app",
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
+      NSCameraUsageDescription:
+        "Arteesans uses your camera for identity face verification during artisan onboarding.",
     },
   },
   android: {
@@ -58,6 +60,13 @@ const config: ExpoConfig = {
       {
         locationWhenInUsePermission:
           "Arteesans uses your location to set your service address and find nearby artisans.",
+      },
+    ],
+    [
+      "expo-camera",
+      {
+        cameraPermission:
+          "Arteesans uses your camera for identity face verification during artisan onboarding.",
       },
     ],
   ],

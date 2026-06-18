@@ -10,7 +10,7 @@ import {
 import { router } from "expo-router";
 import { loginSchema, type LoginInput } from "@arteesans/shared";
 import { Button, FormInput, Text } from "@/components/ui";
-import { useSignInMutation, getPostAuthRoute } from "@/features/auth";
+import { useSignInMutation, resolvePostAuthRoute } from "@/features/auth";
 import { routes, verifyOtpRoute } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
 import { Image } from "expo-image";
@@ -23,7 +23,7 @@ export default function Login() {
 
   const { control, handleSubmit, setError, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "delivered@resend.dev", password: "Boot-Strap0107" },
+    defaultValues: { email: "delivered+3@resend.dev", password: "Boot-Strap0107" },
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -40,7 +40,13 @@ export default function Login() {
     }
 
     const profile = await refreshProfile();
-    router.replace(getPostAuthRoute(profile));
+    if (!profile) {
+      setError("root", { message: "Could not load your profile." });
+      return;
+    }
+
+    const nextRoute = await resolvePostAuthRoute(profile, profile.id);
+    router.replace(nextRoute);
   });
 
   return (

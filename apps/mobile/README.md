@@ -25,6 +25,33 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## iOS native builds
+
+This app uses a **development build** (`expo-dev-client`) with native modules such as `expo-camera`. The `ios/` directory is generated locally and is gitignored.
+
+### Precompiled Expo modules (`EXPO_USE_PRECOMPILED_MODULES`)
+
+In `ios/Podfile.properties.json` we set:
+
+```json
+"EXPO_USE_PRECOMPILED_MODULES": "false"
+```
+
+**Why:** Prebuilt Expo XCFrameworks can get out of sync across packages (for example, `ExpoCamera` expecting a symbol that an older prebuilt `ExpoModulesCore` does not export). That causes an immediate launch crash (`dyld: Symbol missing`) before JavaScript runs. Building Expo modules from source keeps native dependencies on the same SDK version.
+
+**Trade-off:** iOS builds are **slower** (especially the first build after `pod install`), but linking is reliable.
+
+**After regenerating native projects**, re-apply this flag if it is removed:
+
+```bash
+npx expo prebuild --clean
+# Then ensure ios/Podfile.properties.json contains "EXPO_USE_PRECOMPILED_MODULES": "false"
+cd ios && pod install
+npm run ios
+```
+
+You can try removing the flag later once all Expo packages are on the same SDK patch level and a clean rebuild launches without dyld errors. Default Expo behavior is precompiled modules enabled (`true`).
+
 ## Get a fresh project
 
 When you're ready, run:

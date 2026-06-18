@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { type ProfileCompletion, type UserRole } from "@arteesans/shared";
 import { Button, FormInput, Text } from "@/components/ui";
-import { getPostAuthRoute, useCompleteProfileMutation } from "@/features/auth";
+import { resolvePostAuthRoute, useCompleteProfileMutation } from "@/features/auth";
 import { profileFormResolver } from "@/lib/form-resolvers";
 import { routes } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
@@ -47,7 +47,12 @@ export default function CompleteProfile() {
     }
 
     const nextProfile = await refreshProfile();
-    router.replace(getPostAuthRoute(nextProfile));
+    if (!nextProfile) {
+      setError("root", { message: "Could not load your profile." });
+      return;
+    }
+
+    router.replace(await resolvePostAuthRoute(nextProfile, nextProfile.id));
   });
 
   const heading = role === "artisan" ? "Set up your artisan profile" : "Complete your profile";

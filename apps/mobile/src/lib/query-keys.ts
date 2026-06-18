@@ -17,4 +17,14 @@ export const queryKeys = {
     detail: (userId: string | undefined) =>
       [...queryKeys.customerDefaultAddress.all, userId] as const,
   },
+  artisanOnboarding: {
+    all: ["artisan-onboarding-complete"] as const,
+    detail: (userId: string | undefined) =>
+      [...queryKeys.artisanOnboarding.all, userId] as const,
+  },
+  artisanProfile: {
+    all: ["artisan-profile"] as const,
+    detail: (userId: string | undefined) =>
+      [...queryKeys.artisanProfile.all, userId] as const,
+  },
 } as const;

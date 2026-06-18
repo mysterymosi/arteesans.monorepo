@@ -62,7 +62,9 @@ export default function SignUp() {
     }
 
     if (result.verified) {
-      router.replace(homeRouteForRole(data.role));
+      router.replace(
+        data.role === "artisan" ? routes.artisanOnboarding.address : homeRouteForRole(data.role),
+      );
       return;
     }
 
