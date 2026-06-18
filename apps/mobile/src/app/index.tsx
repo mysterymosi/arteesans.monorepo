@@ -41,7 +41,7 @@ export default function Index() {
       return <Redirect href={routes.artisanOnboarding.address} />;
     }
 
-    return <Redirect href={routes.artisan} />;
+    return <Redirect href={routes.artisan.home} />;
   }
 
   if (profile.role === "customer") {

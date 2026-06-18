@@ -114,7 +114,7 @@ export default function ArtisanOnboardingGuarantor() {
         },
       },
       {
-        onSuccess: () => router.replace(routes.artisan),
+        onSuccess: () => router.replace(routes.artisan.home),
         onError: (error) => setError("root", { message: error.message }),
       },
     );
