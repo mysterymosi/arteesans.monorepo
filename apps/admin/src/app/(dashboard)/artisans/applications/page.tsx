@@ -8,7 +8,7 @@ import {
 import {
   getArtisanApplicationDetail,
   getArtisanApplications,
-} from "@/features/admin/queries";
+} from "@/features/admin/services/artisans.service";
 
 export default async function ArtisanApplicationsPage({
   searchParams,

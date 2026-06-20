@@ -6,49 +6,49 @@ import {
   type ActionState,
 } from "@arteesans/shared";
 import { revalidatePath } from "next/cache";
-import { createServiceClient } from "@/lib/supabase/server";
-import { logAdminAction } from "./audit";
+import { logAdminAction } from "@/features/admin/services/audit.service";
+import { updateArtisanVerificationStatus } from "@/features/admin/services/artisans.service";
 
-export async function approveArtisan(userId: string): Promise<ActionState> {
-  const service = createServiceClient();
-
-  const { data: profile, error: fetchError } = await service
-    .from("artisan_profiles")
-    .select("id, verification_status")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (fetchError || !profile) {
-    return { error: fetchError?.message ?? "Artisan profile not found" };
-  }
-
-  const { error } = await service
-    .from("artisan_profiles")
-    .update({ verification_status: "approved" })
-    .eq("user_id", userId);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  await logAdminAction({
-    actionType: "approve",
-    entityType: "artisan_profile",
-    entityId: profile.id,
-    metadata: { userId, previousStatus: profile.verification_status },
-  });
-
+function revalidateArtisanApplications() {
   revalidatePath("/artisans/applications");
   revalidatePath("/");
-  return {};
 }
 
-export async function approveArtisanAction(formData: FormData): Promise<void> {
+async function logArtisanDecision(input: {
+  actionType: string;
+  profileId: string;
+  userId: string;
+  previousStatus: string;
+  reason?: string;
+  note?: string;
+}) {
+  const { actionType, profileId, ...metadata } = input;
+  await logAdminAction({
+    actionType,
+    entityType: "artisan_profile",
+    entityId: profileId,
+    metadata,
+  });
+}
+
+export async function approveArtisan(formData: FormData): Promise<void> {
   const userId = formData.get("userId");
   if (typeof userId !== "string" || !userId) {
     return;
   }
-  await approveArtisan(userId);
+
+  const result = await updateArtisanVerificationStatus(userId, "approved");
+  if ("error" in result) {
+    return;
+  }
+
+  await logArtisanDecision({
+    actionType: "approve",
+    profileId: result.profileId,
+    userId,
+    previousStatus: result.previousStatus,
+  });
+  revalidateArtisanApplications();
 }
 
 export async function rejectArtisan(
@@ -64,39 +64,19 @@ export async function rejectArtisan(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const service = createServiceClient();
-  const { data: profile, error: fetchError } = await service
-    .from("artisan_profiles")
-    .select("id, verification_status")
-    .eq("user_id", parsed.data.userId)
-    .maybeSingle();
-
-  if (fetchError || !profile) {
-    return { error: fetchError?.message ?? "Artisan profile not found" };
+  const result = await updateArtisanVerificationStatus(parsed.data.userId, "rejected");
+  if ("error" in result) {
+    return { error: result.error };
   }
 
-  const { error } = await service
-    .from("artisan_profiles")
-    .update({ verification_status: "rejected" })
-    .eq("user_id", parsed.data.userId);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  await logAdminAction({
+  await logArtisanDecision({
     actionType: "reject",
-    entityType: "artisan_profile",
-    entityId: profile.id,
-    metadata: {
-      userId: parsed.data.userId,
-      reason: parsed.data.reason,
-      previousStatus: profile.verification_status,
-    },
+    profileId: result.profileId,
+    userId: parsed.data.userId,
+    previousStatus: result.previousStatus,
+    reason: parsed.data.reason,
   });
-
-  revalidatePath("/artisans/applications");
-  revalidatePath("/");
+  revalidateArtisanApplications();
   return {};
 }
 
@@ -113,38 +93,18 @@ export async function requestMoreInfo(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const service = createServiceClient();
-  const { data: profile, error: fetchError } = await service
-    .from("artisan_profiles")
-    .select("id, verification_status")
-    .eq("user_id", parsed.data.userId)
-    .maybeSingle();
-
-  if (fetchError || !profile) {
-    return { error: fetchError?.message ?? "Artisan profile not found" };
+  const result = await updateArtisanVerificationStatus(parsed.data.userId, "more_info");
+  if ("error" in result) {
+    return { error: result.error };
   }
 
-  const { error } = await service
-    .from("artisan_profiles")
-    .update({ verification_status: "more_info" })
-    .eq("user_id", parsed.data.userId);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  await logAdminAction({
+  await logArtisanDecision({
     actionType: "request_more_info",
-    entityType: "artisan_profile",
-    entityId: profile.id,
-    metadata: {
-      userId: parsed.data.userId,
-      note: parsed.data.note,
-      previousStatus: profile.verification_status,
-    },
+    profileId: result.profileId,
+    userId: parsed.data.userId,
+    previousStatus: result.previousStatus,
+    note: parsed.data.note,
   });
-
-  revalidatePath("/artisans/applications");
-  revalidatePath("/");
+  revalidateArtisanApplications();
   return {};
 }

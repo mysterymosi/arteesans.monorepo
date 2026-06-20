@@ -1,5 +1,3 @@
-"use server";
-
 import type { Database } from "@arteesans/supabase";
 import { createAuthClient, createServiceClient } from "@/lib/supabase/server";
 

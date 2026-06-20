@@ -39,7 +39,11 @@ export function RequestDetailView({ request }: { request: ServiceRequestDetail }
         <Badge variant="outline">{request.status}</Badge>
         <Badge variant="secondary">{request.urgency}</Badge>
         {request.status === "matching" ? (
-          <Button render={<Link href={`/requests/${request.id}/match`} />} size="sm">
+          <Button
+            nativeButton={false}
+            render={<Link href={`/requests/${request.id}/match`} />}
+            size="sm"
+          >
             Match artisan
           </Button>
         ) : null}

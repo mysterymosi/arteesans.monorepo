@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  approveArtisanAction,
+  approveArtisan,
   rejectArtisan,
   requestMoreInfo,
 } from "@/features/admin/actions/artisans";
@@ -121,7 +121,7 @@ export function ArtisanApplicationDetailView({
             <CardTitle>Review actions</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 lg:grid-cols-3">
-            <form action={approveArtisanAction}>
+            <form action={approveArtisan}>
               <input type="hidden" name="userId" value={application.userId} />
               <Button type="submit">Approve</Button>
             </form>

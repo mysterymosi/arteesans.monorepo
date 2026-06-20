@@ -28,7 +28,11 @@ export default async function RequestMatchPlaceholderPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button render={<Link href={`/requests/${id}`} />} variant="outline">
+            <Button
+              nativeButton={false}
+              render={<Link href={`/requests/${id}`} />}
+              variant="outline"
+            >
               Back to request
             </Button>
           </CardContent>
