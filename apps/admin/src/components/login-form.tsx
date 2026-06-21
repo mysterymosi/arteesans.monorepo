@@ -20,7 +20,7 @@ import { Spinner } from "@/components/ui/spinner";
 import {
   signIn,
   type AuthActionState,
-} from "@/features/admin/actions/auth";
+} from "@/features/auth";
 
 const initialState: AuthActionState = {};
 

@@ -16,7 +16,7 @@ import {
   approveArtisan,
   rejectArtisan,
   requestMoreInfo,
-} from "@/features/admin/actions/artisans";
+} from "@/features/artisans/actions/artisans";
 import type { ActionState } from "@arteesans/shared";
 
 function formatDate(value: string) {

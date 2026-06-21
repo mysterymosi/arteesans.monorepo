@@ -16,7 +16,7 @@ import {
   createCategory,
   deactivateCategory,
   updateCategory,
-} from "@/features/admin/actions/categories";
+} from "@/features/categories/actions/categories";
 import type { ActionState } from "@arteesans/shared";
 import {
   Table,

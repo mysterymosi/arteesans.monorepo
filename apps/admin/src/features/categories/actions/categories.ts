@@ -2,12 +2,12 @@
 
 import { categoryFormSchema, type ActionState } from "@arteesans/shared";
 import { revalidatePath } from "next/cache";
-import { logAdminAction } from "@/features/admin/services/audit.service";
+import { logAdminAction } from "@/features/audit";
 import {
   createServiceCategory,
   deactivateServiceCategory,
   updateServiceCategory,
-} from "@/features/admin/services/categories.service";
+} from "@/features/categories/services/categories.service";
 
 function parseCategoryForm(formData: FormData) {
   return categoryFormSchema.safeParse({

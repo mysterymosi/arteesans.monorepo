@@ -3,8 +3,9 @@ import type {
   ServiceRequestDetail,
   ServiceRequestListItem,
 } from "@arteesans/shared";
+import { formatName } from "@/lib/format";
+import { createSignedUrls } from "@/lib/supabase/storage";
 import { createServiceClient } from "@/lib/supabase/server";
-import { createSignedUrls, formatName } from "./utils";
 
 export async function getServiceRequests(
   filters: RequestFiltersInput = {},

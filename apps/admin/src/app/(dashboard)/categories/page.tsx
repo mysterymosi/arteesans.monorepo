@@ -1,6 +1,5 @@
 import { DashboardPage } from "@/components/dashboard-shell";
-import { CategoriesManager } from "@/features/admin/components/categories-manager";
-import { getCategories } from "@/features/admin/services/categories.service";
+import { CategoriesManager, getCategories } from "@/features/categories";
 
 export default async function CategoriesPage() {
   const categories = await getCategories();
