@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createCategory,
-  deactivateCategoryAction,
+  deactivateCategory,
   updateCategory,
 } from "@/features/admin/actions/categories";
 import type { ActionState } from "@arteesans/shared";
@@ -145,7 +145,7 @@ export function CategoriesManager({ categories }: { categories: CategoryListItem
                 </TableCell>
                 <TableCell className="align-top text-right">
                   {category.isActive ? (
-                    <form action={deactivateCategoryAction}>
+                    <form action={deactivateCategory}>
                       <input type="hidden" name="categoryId" value={category.id} />
                       <Button type="submit" variant="outline" size="sm">
                         Deactivate

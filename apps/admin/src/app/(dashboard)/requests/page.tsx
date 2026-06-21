@@ -6,8 +6,8 @@ import {
 } from "@/features/admin/components/requests-table";
 import {
   getCategoryOptions,
-  getServiceRequests,
-} from "@/features/admin/queries";
+} from "@/features/admin/services/categories.service";
+import { getServiceRequests } from "@/features/admin/services/requests.service";
 
 export default async function RequestsPage({
   searchParams,

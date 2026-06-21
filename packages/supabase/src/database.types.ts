@@ -442,7 +442,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_service_request_details: {
+        Row: {
+          address: string
+          budget: number | null
+          category_id: string
+          created_at: string
+          customer_id: string
+          description: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          media_paths: string[]
+          preferred_time: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          urgency: Database["public"]["Enums"]["urgency_level"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       current_user_role: {
