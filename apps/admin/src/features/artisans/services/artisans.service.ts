@@ -2,8 +2,9 @@ import type {
   ArtisanApplicationDetail,
   ArtisanApplicationListItem,
 } from "@arteesans/shared";
+import { formatName } from "@/lib/format";
+import { createSignedUrls } from "@/lib/supabase/storage";
 import { createServiceClient } from "@/lib/supabase/server";
-import { createSignedUrls, formatName } from "./utils";
 
 type ArtisanStatus = ArtisanApplicationListItem["verificationStatus"];
 type ArtisanStatusUpdateResult =

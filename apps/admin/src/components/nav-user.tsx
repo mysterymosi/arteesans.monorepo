@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { signOut } from "@/features/admin/actions/auth";
+import { signOut } from "@/features/auth";
 import { EllipsisVerticalIcon, LogOutIcon } from "lucide-react";
 
 export function NavUser({

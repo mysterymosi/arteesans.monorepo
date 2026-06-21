@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { DashboardPage } from "@/components/dashboard-shell";
-import { RequestDetailView } from "@/features/admin/components/request-detail";
-import { getServiceRequestDetail } from "@/features/admin/services/requests.service";
+import { getServiceRequestDetail, RequestDetailView } from "@/features/requests";
 
 export default async function RequestDetailPage({
   params,

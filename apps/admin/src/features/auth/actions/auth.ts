@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { loginSchema, type ActionState } from "@arteesans/shared";
-import { signInAdmin, signOutAdmin } from "@/features/admin/services/auth.service";
+import { signInAdmin, signOutAdmin } from "@/features/auth/services/auth.service";
 
 export type AuthActionState = ActionState;
 

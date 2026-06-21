@@ -1,13 +1,7 @@
 import type { REQUEST_STATUSES, URGENCY_LEVELS } from "@arteesans/shared";
 import { DashboardPage } from "@/components/dashboard-shell";
-import {
-  RequestFilters,
-  RequestsTable,
-} from "@/features/admin/components/requests-table";
-import {
-  getCategoryOptions,
-} from "@/features/admin/services/categories.service";
-import { getServiceRequests } from "@/features/admin/services/requests.service";
+import { getCategoryOptions } from "@/features/categories";
+import { getServiceRequests, RequestFilters, RequestsTable } from "@/features/requests";
 
 export default async function RequestsPage({
   searchParams,

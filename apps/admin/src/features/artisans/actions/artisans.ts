@@ -6,8 +6,8 @@ import {
   type ActionState,
 } from "@arteesans/shared";
 import { revalidatePath } from "next/cache";
-import { logAdminAction } from "@/features/admin/services/audit.service";
-import { updateArtisanVerificationStatus } from "@/features/admin/services/artisans.service";
+import { logAdminAction } from "@/features/audit";
+import { updateArtisanVerificationStatus } from "@/features/artisans/services/artisans.service";
 
 function revalidateArtisanApplications() {
   revalidatePath("/artisans/applications");

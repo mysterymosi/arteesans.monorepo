@@ -1,14 +1,12 @@
 import type { VERIFICATION_STATUSES } from "@arteesans/shared";
 import { DashboardPage } from "@/components/dashboard-shell";
-import { ArtisanApplicationDetailView } from "@/features/admin/components/artisan-application-detail";
 import {
+  ArtisanApplicationDetailView,
   ArtisanApplicationsTable,
   ArtisanStatusFilter,
-} from "@/features/admin/components/artisan-applications-table";
-import {
   getArtisanApplicationDetail,
   getArtisanApplications,
-} from "@/features/admin/services/artisans.service";
+} from "@/features/artisans";
 
 export default async function ArtisanApplicationsPage({
   searchParams,

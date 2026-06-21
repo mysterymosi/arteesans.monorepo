@@ -1,13 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/server";
-
-export function formatName(
-  firstName: string | null,
-  lastName: string | null,
-  email: string | null,
-): string {
-  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
-  return fullName || email || "Unknown";
-}
+import { createServiceClient } from "./server";
 
 export async function createSignedUrls(bucket: string, paths: string[]) {
   if (paths.length === 0) {
