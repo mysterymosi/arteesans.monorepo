@@ -1,7 +1,10 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { REQUEST_STATUSES, URGENCY_LEVELS } from "@arteesans/shared";
 import { DashboardPage } from "@/components/dashboard-shell";
-import { getCategoryOptions } from "@/features/categories";
-import { getServiceRequests, RequestFilters, RequestsTable } from "@/features/requests";
+import { createQueryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
+import { getCategories } from "@/features/categories";
+import { getServiceRequests, RequestsPageClient } from "@/features/requests";
 
 export default async function RequestsPage({
   searchParams,
@@ -13,21 +16,23 @@ export default async function RequestsPage({
   }>;
 }) {
   const filters = await searchParams;
-  const [requests, categories] = await Promise.all([
-    getServiceRequests(filters),
-    getCategoryOptions(),
+  const queryClient = createQueryClient();
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.serviceRequests.list(filters),
+      queryFn: () => getServiceRequests(filters),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.categories.list(),
+      queryFn: getCategories,
+    }),
   ]);
 
   return (
     <DashboardPage title="Service requests">
-      <RequestFilters
-        categories={categories.map((category) => ({
-          id: category.id,
-          name: category.name,
-        }))}
-        current={filters}
-      />
-      <RequestsTable requests={requests} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <RequestsPageClient filters={filters} />
+      </HydrationBoundary>
     </DashboardPage>
   );
 }

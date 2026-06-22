@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import type { UseMutationResult } from "@tanstack/react-query";
 import type { ArtisanApplicationDetail } from "@arteesans/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,10 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  approveArtisan,
-  rejectArtisan,
-  requestMoreInfo,
-} from "@/features/artisans/actions/artisans";
-import type { ActionState } from "@arteesans/shared";
+  useApproveArtisan,
+  useRejectArtisan,
+  useRequestMoreInfo,
+} from "@/features/artisans/hooks/use-artisan-applications";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-NG", {
@@ -27,24 +26,24 @@ function formatDate(value: string) {
 }
 
 function ActionForm({
-  action,
+  mutation,
   userId,
   submitLabel,
   children,
 }: {
-  action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
+  mutation: UseMutationResult<void, Error, FormData>;
   userId: string;
   submitLabel: string;
   children?: React.ReactNode;
 }) {
-  const [state, formAction, isPending] = useActionState(action, {});
-
   return (
-    <form action={formAction} className="space-y-3">
+    <form action={(formData) => mutation.mutate(formData)} className="space-y-3">
       <input type="hidden" name="userId" value={userId} />
       {children}
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-      <Button type="submit" disabled={isPending} variant="outline">
+      {mutation.error ? (
+        <p className="text-sm text-destructive">{mutation.error.message}</p>
+      ) : null}
+      <Button type="submit" disabled={mutation.isPending} variant="outline">
         {submitLabel}
       </Button>
     </form>
@@ -56,6 +55,9 @@ export function ArtisanApplicationDetailView({
 }: {
   application: ArtisanApplicationDetail;
 }) {
+  const approveMutation = useApproveArtisan();
+  const rejectMutation = useRejectArtisan();
+  const moreInfoMutation = useRequestMoreInfo();
   const canReview =
     application.verificationStatus === "pending" ||
     application.verificationStatus === "more_info";
@@ -121,12 +123,23 @@ export function ArtisanApplicationDetailView({
             <CardTitle>Review actions</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 lg:grid-cols-3">
-            <form action={approveArtisan}>
+            <form action={(formData) => approveMutation.mutate(formData)}>
               <input type="hidden" name="userId" value={application.userId} />
-              <Button type="submit">Approve</Button>
+              {approveMutation.error ? (
+                <p className="mb-3 text-sm text-destructive">
+                  {approveMutation.error.message}
+                </p>
+              ) : null}
+              <Button type="submit" disabled={approveMutation.isPending}>
+                Approve
+              </Button>
             </form>
 
-            <ActionForm action={rejectArtisan} userId={application.userId} submitLabel="Reject">
+            <ActionForm
+              mutation={rejectMutation}
+              userId={application.userId}
+              submitLabel="Reject"
+            >
               <Textarea
                 name="reason"
                 placeholder="Rejection reason"
@@ -136,7 +149,7 @@ export function ArtisanApplicationDetailView({
             </ActionForm>
 
             <ActionForm
-              action={requestMoreInfo}
+              mutation={moreInfoMutation}
               userId={application.userId}
               submitLabel="Request more info"
             >

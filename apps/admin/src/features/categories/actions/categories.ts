@@ -1,7 +1,6 @@
 "use server";
 
 import { categoryFormSchema, type ActionState } from "@arteesans/shared";
-import { revalidatePath } from "next/cache";
 import { logAdminAction } from "@/features/audit";
 import {
   createServiceCategory,
@@ -51,7 +50,6 @@ export async function createCategory(
 
   await logCategoryAction("create", result.categoryId, parsed.data);
 
-  revalidatePath("/categories");
   return {};
 }
 
@@ -73,22 +71,21 @@ export async function updateCategory(
 
   await logCategoryAction("update", categoryId, parsed.data);
 
-  revalidatePath("/categories");
   return {};
 }
 
-export async function deactivateCategory(formData: FormData): Promise<void> {
+export async function deactivateCategory(formData: FormData): Promise<ActionState> {
   const categoryId = formData.get("categoryId");
   if (typeof categoryId !== "string" || !categoryId) {
-    return;
+    return { error: "Invalid input" };
   }
 
   const result = await deactivateServiceCategory(categoryId);
   if ("error" in result) {
-    return;
+    return { error: result.error };
   }
 
   await logCategoryAction("deactivate", categoryId);
 
-  revalidatePath("/categories");
+  return {};
 }

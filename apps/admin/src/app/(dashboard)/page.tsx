@@ -1,13 +1,21 @@
-import { SectionCards } from "@/components/section-cards";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { DashboardPage } from "@/components/dashboard-shell";
-import { getDashboardStats } from "@/features/dashboard";
+import { createQueryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
+import { DashboardStatsPanel, getDashboardStats } from "@/features/dashboard";
 
 export default async function OverviewPage() {
-  const stats = await getDashboardStats();
+  const queryClient = createQueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: queryKeys.dashboard.stats(),
+    queryFn: getDashboardStats,
+  });
 
   return (
     <DashboardPage title="Overview">
-      <SectionCards stats={stats} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <DashboardStatsPanel />
+      </HydrationBoundary>
     </DashboardPage>
   );
 }

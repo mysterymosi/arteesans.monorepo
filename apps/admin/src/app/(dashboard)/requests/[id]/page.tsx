@@ -1,6 +1,9 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import { DashboardPage } from "@/components/dashboard-shell";
-import { getServiceRequestDetail, RequestDetailView } from "@/features/requests";
+import { createQueryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
+import { getServiceRequestDetail, RequestDetailClient } from "@/features/requests";
 
 export default async function RequestDetailPage({
   params,
@@ -8,7 +11,11 @@ export default async function RequestDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const request = await getServiceRequestDetail(id);
+  const queryClient = createQueryClient();
+  const request = await queryClient.ensureQueryData({
+    queryKey: queryKeys.serviceRequests.detail(id),
+    queryFn: () => getServiceRequestDetail(id),
+  });
 
   if (!request) {
     notFound();
@@ -16,7 +23,9 @@ export default async function RequestDetailPage({
 
   return (
     <DashboardPage title="Request detail">
-      <RequestDetailView request={request} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <RequestDetailClient requestId={id} />
+      </HydrationBoundary>
     </DashboardPage>
   );
 }
