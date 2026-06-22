@@ -4,9 +4,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   ActionState,
   ArtisanApplicationDetail,
-  ArtisanApplicationListItem,
 } from "@arteesans/shared";
 import { fetchJson } from "@/lib/fetch-json";
+import { endpoints } from "@/lib/endpoints";
 import { queryKeys } from "@/lib/query-keys";
 import {
   approveArtisan,
@@ -20,31 +20,18 @@ function assertActionSuccess(result: ActionState) {
   }
 }
 
-function applicationsUrl(
-  status: ArtisanApplicationListItem["verificationStatus"] | undefined,
-) {
-  return status
-    ? `/api/artisans/applications?status=${encodeURIComponent(status)}`
-    : "/api/artisans/applications";
-}
-
-export function useArtisanApplications(
-  status: ArtisanApplicationListItem["verificationStatus"] | undefined,
-) {
-  return useQuery({
-    queryKey: queryKeys.artisanApplications.list(status),
-    queryFn: () =>
-      fetchJson<ArtisanApplicationListItem[]>(applicationsUrl(status)),
-  });
-}
-
 export function useArtisanApplication(userId: string | undefined) {
   return useQuery({
     queryKey: queryKeys.artisanApplications.detail(userId),
-    queryFn: () =>
-      fetchJson<ArtisanApplicationDetail>(
-        `/api/artisans/applications/${userId}`,
-      ),
+    queryFn: () => {
+      if (!userId) {
+        throw new Error("User ID is required.");
+      }
+
+      return fetchJson<ArtisanApplicationDetail>(
+        endpoints.artisanApplications.detail(userId),
+      );
+    },
     enabled: Boolean(userId),
   });
 }

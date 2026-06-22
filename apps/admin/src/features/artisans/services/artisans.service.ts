@@ -3,6 +3,13 @@ import type {
   ArtisanApplicationListItem,
 } from "@arteesans/shared";
 import { formatName } from "@/lib/format";
+import {
+  normalizePagination,
+  paginationRange,
+  toPageCount,
+  type PaginatedResult,
+  type PaginationParams,
+} from "@/lib/pagination";
 import { createSignedUrls } from "@/lib/supabase/storage";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -13,8 +20,11 @@ type ArtisanStatusUpdateResult =
 
 export async function getArtisanApplications(
   status?: ArtisanStatus,
-): Promise<ArtisanApplicationListItem[]> {
+  paginationInput: Partial<PaginationParams> = {},
+): Promise<PaginatedResult<ArtisanApplicationListItem>> {
   const service = createServiceClient();
+  const pagination = normalizePagination(paginationInput);
+  const { from, to } = paginationRange(pagination);
 
   let query = service
     .from("artisan_profiles")
@@ -28,41 +38,56 @@ export async function getArtisanApplications(
       user:users!artisan_profiles_user_id_fkey(first_name, last_name, email, phone),
       primary_skill:service_categories!artisan_profiles_primary_skill_category_id_fkey(name)
     `,
+      { count: "exact" },
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (status) {
     query = query.eq("verification_status", status);
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error || !data) {
-    return [];
-  }
-
-  return data.map((row) => {
-    const user = Array.isArray(row.user) ? row.user[0] : row.user;
-    const primarySkill = Array.isArray(row.primary_skill)
-      ? row.primary_skill[0]
-      : row.primary_skill;
-
     return {
-      profileId: row.id,
-      userId: row.user_id,
-      name: formatName(
-        user?.first_name ?? null,
-        user?.last_name ?? null,
-        user?.email ?? null,
-      ),
-      email: user?.email ?? null,
-      phone: user?.phone ?? null,
-      verificationStatus: row.verification_status,
-      primarySkill: primarySkill?.name ?? null,
-      state: row.state,
-      submittedAt: row.created_at,
+      data: [],
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      pageCount: 1,
+      total: 0,
     };
-  });
+  }
+  const total = count ?? 0;
+
+  return {
+    data: data.map((row) => {
+      const user = Array.isArray(row.user) ? row.user[0] : row.user;
+      const primarySkill = Array.isArray(row.primary_skill)
+        ? row.primary_skill[0]
+        : row.primary_skill;
+
+      return {
+        profileId: row.id,
+        userId: row.user_id,
+        name: formatName(
+          user?.first_name ?? null,
+          user?.last_name ?? null,
+          user?.email ?? null,
+        ),
+        email: user?.email ?? null,
+        phone: user?.phone ?? null,
+        verificationStatus: row.verification_status,
+        primarySkill: primarySkill?.name ?? null,
+        state: row.state,
+        submittedAt: row.created_at,
+      };
+    }),
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+    pageCount: toPageCount(total, pagination.pageSize),
+    total,
+  };
 }
 
 export async function getArtisanApplicationDetail(
