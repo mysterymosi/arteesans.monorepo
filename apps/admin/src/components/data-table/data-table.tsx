@@ -22,6 +22,17 @@ import {
 import type { PaginatedResult, PaginationParams } from "@/lib/pagination";
 import { normalizePagination } from "@/lib/pagination";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
   Table,
   TableBody,
   TableCell,
@@ -195,7 +206,12 @@ function ServerDataTable<
 
   if (query.isError) {
     return (
-      <p className="px-4 text-sm text-destructive lg:px-6">{errorMessage}</p>
+      <div className="px-4 lg:px-6">
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load data</AlertTitle>
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
@@ -302,9 +318,14 @@ function ControlledDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
+                  className="h-36"
                 >
-                  {emptyMessage}
+                  <Empty className="border-0 p-4">
+                    <EmptyHeader>
+                      <EmptyTitle>No rows found</EmptyTitle>
+                      <EmptyDescription>{emptyMessage}</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import type { ServiceRequestDetail } from "@arteesans/shared";
-import { Badge } from "@/components/ui/badge";
+import {
+  RequestStatusBadge,
+  RequestUrgencyBadge,
+} from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,8 +39,8 @@ export function RequestDetailView({ request }: { request: ServiceRequestDetail }
   return (
     <div className="flex flex-col gap-4 px-4 lg:px-6">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline">{request.status}</Badge>
-        <Badge variant="secondary">{request.urgency}</Badge>
+        <RequestStatusBadge status={request.status} />
+        <RequestUrgencyBadge urgency={request.urgency} />
         {request.status === "matching" ? (
           <Button
             nativeButton={false}
@@ -55,7 +58,7 @@ export function RequestDetailView({ request }: { request: ServiceRequestDetail }
             <CardTitle>Request details</CardTitle>
             <CardDescription>{request.categoryName}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
+          <CardContent className="flex flex-col gap-3 text-sm">
             <p>{request.description}</p>
             <div>
               <span className="font-medium">Address:</span> {request.address}
@@ -77,7 +80,7 @@ export function RequestDetailView({ request }: { request: ServiceRequestDetail }
           <CardHeader>
             <CardTitle>Customer</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="flex flex-col gap-2 text-sm">
             <div className="font-medium">{request.customerName}</div>
             <div>{request.customer.email ?? "No email"}</div>
             <div>{request.customer.phone ?? "No phone"}</div>

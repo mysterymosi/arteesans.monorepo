@@ -63,7 +63,7 @@ export function AppSidebar({
               className="data-[slot=sidebar-menu-button]:p-1.5!"
               render={<Link href="/" />}
             >
-              <CommandIcon className="size-5!" />
+              <CommandIcon className="text-primary" />
               <span className="text-base font-semibold">Arteesans Admin</span>
             </SidebarMenuButton>
           </SidebarMenuItem>

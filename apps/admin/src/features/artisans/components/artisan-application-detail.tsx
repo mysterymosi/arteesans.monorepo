@@ -9,7 +9,7 @@ import {
   type RejectArtisanInput,
   type RequestMoreInfoInput,
 } from "@arteesans/shared";
-import { Badge } from "@/components/ui/badge";
+import { VerificationStatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -156,7 +156,7 @@ export function ArtisanApplicationDetailView({
   return (
     <div className="flex flex-col gap-4 px-4 lg:px-6">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline">{application.verificationStatus}</Badge>
+        <VerificationStatusBadge status={application.verificationStatus} />
         <span className="text-sm text-muted-foreground">
           Submitted {formatDate(application.submittedAt)}
         </span>
@@ -168,7 +168,7 @@ export function ArtisanApplicationDetailView({
             <CardTitle>{application.name}</CardTitle>
             <CardDescription>{application.primarySkill ?? "No primary skill"}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="flex flex-col gap-2 text-sm">
             <div>{application.email ?? "No email"}</div>
             <div>{application.phone ?? "No phone"}</div>
             <div>{application.state ?? "No state"}</div>
@@ -183,7 +183,7 @@ export function ArtisanApplicationDetailView({
           <CardHeader>
             <CardTitle>Verification documents</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3">
             {application.documents.length === 0 ? (
               <p className="text-sm text-muted-foreground">No documents uploaded.</p>
             ) : (

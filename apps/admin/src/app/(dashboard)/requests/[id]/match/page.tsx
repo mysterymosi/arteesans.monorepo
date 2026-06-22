@@ -2,12 +2,12 @@ import Link from "next/link";
 import { DashboardPage } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 export default async function RequestMatchPlaceholderPage({
   params,
@@ -19,15 +19,15 @@ export default async function RequestMatchPlaceholderPage({
   return (
     <DashboardPage title="Match artisan">
       <div className="px-4 lg:px-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Matching coming in Phase 1.6</CardTitle>
-            <CardDescription>
+        <Empty className="border bg-card">
+          <EmptyHeader>
+            <EmptyTitle>Matching coming in Phase 1.6</EmptyTitle>
+            <EmptyDescription>
               Ranked artisan suggestions and manual assignment will be built in the
               matching epic.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
             <Button
               nativeButton={false}
               render={<Link href={`/requests/${id}`} />}
@@ -35,8 +35,8 @@ export default async function RequestMatchPlaceholderPage({
             >
               Back to request
             </Button>
-          </CardContent>
-        </Card>
+          </EmptyContent>
+        </Empty>
       </div>
     </DashboardPage>
   );

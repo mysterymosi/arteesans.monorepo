@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ArtisanApplicationListItem } from "@arteesans/shared";
 import { DataTableColumnHeader } from "@/components/data-table";
-import { Badge } from "@/components/ui/badge";
+import { VerificationStatusBadge } from "@/components/status-badge";
 import { formatDateTime } from "@/lib/format";
 
 export const artisanApplicationColumns: ColumnDef<ArtisanApplicationListItem>[] = [
@@ -46,7 +46,7 @@ export const artisanApplicationColumns: ColumnDef<ArtisanApplicationListItem>[] 
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => (
-      <Badge variant="outline">{row.original.verificationStatus}</Badge>
+      <VerificationStatusBadge status={row.original.verificationStatus} />
     ),
   },
   {

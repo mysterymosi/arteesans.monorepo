@@ -4,7 +4,10 @@ import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ServiceRequestListItem } from "@arteesans/shared";
 import { DataTableColumnHeader } from "@/components/data-table";
-import { Badge } from "@/components/ui/badge";
+import {
+  RequestStatusBadge,
+  RequestUrgencyBadge,
+} from "@/components/status-badge";
 import { formatDateTime } from "@/lib/format";
 
 export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
@@ -36,7 +39,7 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <Badge variant="outline">{row.original.status}</Badge>,
+    cell: ({ row }) => <RequestStatusBadge status={row.original.status} />,
   },
   {
     accessorKey: "urgency",
@@ -44,6 +47,7 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Urgency" />
     ),
+    cell: ({ row }) => <RequestUrgencyBadge urgency={row.original.urgency} />,
   },
   {
     accessorKey: "createdAt",

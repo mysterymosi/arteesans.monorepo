@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { CategoryListItem } from "@arteesans/shared";
 import { DataTableColumnHeader } from "@/components/data-table";
-import { Badge } from "@/components/ui/badge";
+import { CategoryStatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { formatNaira } from "@/lib/format";
 
@@ -56,11 +56,7 @@ export function getCategoryColumns({
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Status" />
       ),
-      cell: ({ row }) => (
-        <Badge variant={row.original.isActive ? "outline" : "secondary"}>
-          {row.original.isActive ? "active" : "inactive"}
-        </Badge>
-      ),
+      cell: ({ row }) => <CategoryStatusBadge isActive={row.original.isActive} />,
     },
     {
       id: "actions",
