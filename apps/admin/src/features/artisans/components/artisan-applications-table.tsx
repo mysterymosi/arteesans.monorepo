@@ -60,7 +60,7 @@ export function ArtisanApplicationsTable({
               <TableCell>{formatDate(application.submittedAt)}</TableCell>
               <TableCell className="text-right">
                 <Link
-                  href={`/artisans/applications?userId=${application.userId}`}
+                  href={`/artisans/applications/${application.userId}`}
                   className="text-sm font-medium text-primary hover:underline"
                 >
                   Review

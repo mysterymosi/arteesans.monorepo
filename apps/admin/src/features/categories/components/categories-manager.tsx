@@ -1,6 +1,5 @@
 "use client";
 
-import { useActionState } from "react";
 import type { CategoryListItem } from "@arteesans/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,11 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  createCategory,
-  deactivateCategory,
-  updateCategory,
-} from "@/features/categories/actions/categories";
-import type { ActionState } from "@arteesans/shared";
+  useCategories,
+  useCreateCategory,
+  useDeactivateCategory,
+  useUpdateCategory,
+} from "@/features/categories/hooks/use-categories";
 import {
   Table,
   TableBody,
@@ -37,18 +36,20 @@ function formatCurrency(value: number | null) {
 }
 
 function CategoryForm({
-  action,
+  onSubmit,
   initial,
+  error,
+  isPending,
   submitLabel,
 }: {
-  action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
+  onSubmit: (formData: FormData) => void;
   initial?: Partial<CategoryListItem>;
+  error?: Error | null;
+  isPending?: boolean;
   submitLabel: string;
 }) {
-  const [state, formAction, isPending] = useActionState(action, {});
-
   return (
-    <form action={formAction} className="grid gap-3 md:grid-cols-2">
+    <form action={onSubmit} className="grid gap-3 md:grid-cols-2">
       <Input name="name" placeholder="Name" defaultValue={initial?.name} required />
       <Input name="slug" placeholder="slug" defaultValue={initial?.slug} required />
       <Textarea
@@ -86,8 +87,8 @@ function CategoryForm({
         />
         Active
       </label>
-      {state.error ? (
-        <p className="text-sm text-destructive md:col-span-2">{state.error}</p>
+      {error ? (
+        <p className="text-sm text-destructive md:col-span-2">{error.message}</p>
       ) : null}
       <Button type="submit" disabled={isPending} className="md:col-span-2 md:w-fit">
         {submitLabel}
@@ -96,7 +97,13 @@ function CategoryForm({
   );
 }
 
-export function CategoriesManager({ categories }: { categories: CategoryListItem[] }) {
+export function CategoriesManager() {
+  const categoriesQuery = useCategories();
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deactivateMutation = useDeactivateCategory();
+  const categories = categoriesQuery.data ?? [];
+
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <Card>
@@ -104,9 +111,18 @@ export function CategoriesManager({ categories }: { categories: CategoryListItem
           <CardTitle>Create category</CardTitle>
         </CardHeader>
         <CardContent>
-          <CategoryForm action={createCategory} submitLabel="Create category" />
+          <CategoryForm
+            error={createMutation.error}
+            isPending={createMutation.isPending}
+            onSubmit={(formData) => createMutation.mutate(formData)}
+            submitLabel="Create category"
+          />
         </CardContent>
       </Card>
+
+      {categoriesQuery.isError ? (
+        <p className="text-sm text-destructive">Unable to load categories.</p>
+      ) : null}
 
       <Table>
         <TableHeader>
@@ -120,15 +136,25 @@ export function CategoriesManager({ categories }: { categories: CategoryListItem
         </TableHeader>
         <TableBody>
           {categories.map((category) => {
-            const updateAction = updateCategory.bind(null, category.id);
             return (
               <TableRow key={category.id}>
                 <TableCell className="align-top">
                   <div className="font-medium">{category.name}</div>
                   <div className="mt-3">
                     <CategoryForm
-                      action={updateAction}
+                      error={
+                        updateMutation.variables?.categoryId === category.id
+                          ? updateMutation.error
+                          : null
+                      }
                       initial={category}
+                      isPending={
+                        updateMutation.isPending &&
+                        updateMutation.variables?.categoryId === category.id
+                      }
+                      onSubmit={(formData) =>
+                        updateMutation.mutate({ categoryId: category.id, formData })
+                      }
                       submitLabel="Save changes"
                     />
                   </div>
@@ -145,9 +171,16 @@ export function CategoriesManager({ categories }: { categories: CategoryListItem
                 </TableCell>
                 <TableCell className="align-top text-right">
                   {category.isActive ? (
-                    <form action={deactivateCategory}>
+                    <form
+                      action={(formData) => deactivateMutation.mutate(formData)}
+                    >
                       <input type="hidden" name="categoryId" value={category.id} />
-                      <Button type="submit" variant="outline" size="sm">
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        size="sm"
+                        disabled={deactivateMutation.isPending}
+                      >
                         Deactivate
                       </Button>
                     </form>

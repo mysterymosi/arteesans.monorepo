@@ -5,14 +5,8 @@ import {
   requestMoreInfoSchema,
   type ActionState,
 } from "@arteesans/shared";
-import { revalidatePath } from "next/cache";
 import { logAdminAction } from "@/features/audit";
 import { updateArtisanVerificationStatus } from "@/features/artisans/services/artisans.service";
-
-function revalidateArtisanApplications() {
-  revalidatePath("/artisans/applications");
-  revalidatePath("/");
-}
 
 async function logArtisanDecision(input: {
   actionType: string;
@@ -31,15 +25,15 @@ async function logArtisanDecision(input: {
   });
 }
 
-export async function approveArtisan(formData: FormData): Promise<void> {
+export async function approveArtisan(formData: FormData): Promise<ActionState> {
   const userId = formData.get("userId");
   if (typeof userId !== "string" || !userId) {
-    return;
+    return { error: "Invalid input" };
   }
 
   const result = await updateArtisanVerificationStatus(userId, "approved");
   if ("error" in result) {
-    return;
+    return { error: result.error };
   }
 
   await logArtisanDecision({
@@ -48,7 +42,7 @@ export async function approveArtisan(formData: FormData): Promise<void> {
     userId,
     previousStatus: result.previousStatus,
   });
-  revalidateArtisanApplications();
+  return {};
 }
 
 export async function rejectArtisan(
@@ -76,7 +70,6 @@ export async function rejectArtisan(
     previousStatus: result.previousStatus,
     reason: parsed.data.reason,
   });
-  revalidateArtisanApplications();
   return {};
 }
 
@@ -105,6 +98,5 @@ export async function requestMoreInfo(
     previousStatus: result.previousStatus,
     note: parsed.data.note,
   });
-  revalidateArtisanApplications();
   return {};
 }
