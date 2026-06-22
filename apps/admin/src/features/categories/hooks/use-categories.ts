@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, CategoryListItem } from "@arteesans/shared";
+import { endpoints } from "@/lib/endpoints";
 import { fetchJson } from "@/lib/fetch-json";
 import { queryKeys } from "@/lib/query-keys";
 import {
@@ -19,7 +20,7 @@ function assertActionSuccess(result: ActionState) {
 export function useCategories() {
   return useQuery({
     queryKey: queryKeys.categories.list(),
-    queryFn: () => fetchJson<CategoryListItem[]>("/api/categories"),
+    queryFn: () => fetchJson<CategoryListItem[]>(endpoints.categories.list),
   });
 }
 

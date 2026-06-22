@@ -2,6 +2,7 @@ import type {
   ArtisanApplicationListItem,
   RequestFiltersInput,
 } from "@arteesans/shared";
+import type { PaginationParams } from "@/lib/pagination";
 
 export const queryKeys = {
   dashboard: {
@@ -11,8 +12,10 @@ export const queryKeys = {
   serviceRequests: {
     all: ["service-requests"] as const,
     lists: () => [...queryKeys.serviceRequests.all, "list"] as const,
-    list: (filters: RequestFiltersInput = {}) =>
-      [...queryKeys.serviceRequests.lists(), filters] as const,
+    list: (
+      filters: RequestFiltersInput = {},
+      pagination: PaginationParams,
+    ) => [...queryKeys.serviceRequests.lists(), filters, pagination] as const,
     details: () => [...queryKeys.serviceRequests.all, "detail"] as const,
     detail: (requestId: string | undefined) =>
       [...queryKeys.serviceRequests.details(), requestId] as const,
@@ -22,7 +25,8 @@ export const queryKeys = {
     lists: () => [...queryKeys.artisanApplications.all, "list"] as const,
     list: (
       status: ArtisanApplicationListItem["verificationStatus"] | undefined,
-    ) => [...queryKeys.artisanApplications.lists(), status] as const,
+      pagination: PaginationParams,
+    ) => [...queryKeys.artisanApplications.lists(), status, pagination] as const,
     details: () => [...queryKeys.artisanApplications.all, "detail"] as const,
     detail: (userId: string | undefined) =>
       [...queryKeys.artisanApplications.details(), userId] as const,

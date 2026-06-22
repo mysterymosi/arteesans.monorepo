@@ -1,7 +1,9 @@
 "use client";
 
+import * as React from "react";
+import type { PaginationState } from "@tanstack/react-table";
 import type { CategoryListItem } from "@arteesans/shared";
-import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,29 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DEFAULT_PAGE_SIZE, toPageCount } from "@/lib/pagination";
 import {
   useCategories,
   useCreateCategory,
   useDeactivateCategory,
   useUpdateCategory,
 } from "@/features/categories/hooks/use-categories";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-function formatCurrency(value: number | null) {
-  if (value == null) return "—";
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+import { getCategoryColumns } from "./categories-columns";
 
 function CategoryForm({
   onSubmit,
@@ -102,7 +89,31 @@ export function CategoriesManager() {
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
   const deactivateMutation = useDeactivateCategory();
+  const [editingCategory, setEditingCategory] =
+    React.useState<CategoryListItem | null>(null);
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
   const categories = categoriesQuery.data ?? [];
+  const pageCount = toPageCount(categories.length, pagination.pageSize);
+  const pageData = categories.slice(
+    pagination.pageIndex * pagination.pageSize,
+    pagination.pageIndex * pagination.pageSize + pagination.pageSize,
+  );
+  const columns = React.useMemo(
+    () =>
+      getCategoryColumns({
+        onEdit: setEditingCategory,
+        onDeactivate: (categoryId) => {
+          const formData = new FormData();
+          formData.set("categoryId", categoryId);
+          deactivateMutation.mutate(formData);
+        },
+        isDeactivating: deactivateMutation.isPending,
+      }),
+    [deactivateMutation],
+  );
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
@@ -120,77 +131,41 @@ export function CategoriesManager() {
         </CardContent>
       </Card>
 
+      {editingCategory ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Edit {editingCategory.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CategoryForm
+              error={updateMutation.error}
+              initial={editingCategory}
+              isPending={updateMutation.isPending}
+              onSubmit={(formData) =>
+                updateMutation.mutate(
+                  { categoryId: editingCategory.id, formData },
+                  { onSuccess: () => setEditingCategory(null) },
+                )
+              }
+              submitLabel="Save changes"
+            />
+          </CardContent>
+        </Card>
+      ) : null}
+
       {categoriesQuery.isError ? (
         <p className="text-sm text-destructive">Unable to load categories.</p>
       ) : null}
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Slug</TableHead>
-            <TableHead>Price range</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {categories.map((category) => {
-            return (
-              <TableRow key={category.id}>
-                <TableCell className="align-top">
-                  <div className="font-medium">{category.name}</div>
-                  <div className="mt-3">
-                    <CategoryForm
-                      error={
-                        updateMutation.variables?.categoryId === category.id
-                          ? updateMutation.error
-                          : null
-                      }
-                      initial={category}
-                      isPending={
-                        updateMutation.isPending &&
-                        updateMutation.variables?.categoryId === category.id
-                      }
-                      onSubmit={(formData) =>
-                        updateMutation.mutate({ categoryId: category.id, formData })
-                      }
-                      submitLabel="Save changes"
-                    />
-                  </div>
-                </TableCell>
-                <TableCell className="align-top">{category.slug}</TableCell>
-                <TableCell className="align-top">
-                  {formatCurrency(category.startingPriceMin)} –{" "}
-                  {formatCurrency(category.startingPriceMax)}
-                </TableCell>
-                <TableCell className="align-top">
-                  <Badge variant={category.isActive ? "outline" : "secondary"}>
-                    {category.isActive ? "active" : "inactive"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="align-top text-right">
-                  {category.isActive ? (
-                    <form
-                      action={(formData) => deactivateMutation.mutate(formData)}
-                    >
-                      <input type="hidden" name="categoryId" value={category.id} />
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        size="sm"
-                        disabled={deactivateMutation.isPending}
-                      >
-                        Deactivate
-                      </Button>
-                    </form>
-                  ) : null}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={columns}
+        data={pageData}
+        emptyMessage="No categories found."
+        pageCount={pageCount}
+        totalRows={categories.length}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+      />
     </div>
   );
 }
