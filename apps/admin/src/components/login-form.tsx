@@ -1,6 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { loginSchema, type LoginInput } from "@arteesans/shared";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,27 +15,33 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  signIn,
-  type AuthActionState,
-} from "@/features/auth";
-
-const initialState: AuthActionState = {};
+import { signIn } from "@/features/auth";
 
 export function LoginForm({
   className,
   initialError,
   ...props
 }: React.ComponentProps<"div"> & { initialError?: string }) {
-  const [state, formAction, isPending] = useActionState(signIn, {
-    ...initialState,
-    error: initialError,
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
+
+  async function onSubmit(input: LoginInput) {
+    const result = await signIn(input);
+    if (result?.error) {
+      toast.error(result.error);
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -44,35 +53,57 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={formAction}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="admin@arteesans.ng"
-                  autoComplete="email"
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                />
-              </Field>
-              {state.error ? (
-                <p className="text-sm text-destructive">{state.error}</p>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="email"
+                      placeholder="admin@arteesans.ng"
+                      autoComplete="email"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid ? (
+                      <FieldError errors={[fieldState.error]} />
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="password"
+                      autoComplete="current-password"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid ? (
+                      <FieldError errors={[fieldState.error]} />
+                    ) : null}
+                  </Field>
+                )}
+              />
+              {initialError ? (
+                <FieldError errors={[{ message: initialError }]} />
               ) : null}
               <Field>
-                <Button type="submit" disabled={isPending} className="w-full">
-                  {isPending ? <Spinner className="size-4" /> : "Sign in"}
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full"
+                >
+                  {form.formState.isSubmitting ? <Spinner /> : "Sign in"}
                 </Button>
               </Field>
             </FieldGroup>

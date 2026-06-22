@@ -4,6 +4,8 @@ import {
   rejectArtisanSchema,
   requestMoreInfoSchema,
   type ActionState,
+  type RejectArtisanInput,
+  type RequestMoreInfoInput,
 } from "@arteesans/shared";
 import { logAdminAction } from "@/features/audit";
 import { updateArtisanVerificationStatus } from "@/features/artisans/services/artisans.service";
@@ -25,9 +27,8 @@ async function logArtisanDecision(input: {
   });
 }
 
-export async function approveArtisan(formData: FormData): Promise<ActionState> {
-  const userId = formData.get("userId");
-  if (typeof userId !== "string" || !userId) {
+export async function approveArtisan(userId: string): Promise<ActionState> {
+  if (!userId) {
     return { error: "Invalid input" };
   }
 
@@ -46,13 +47,9 @@ export async function approveArtisan(formData: FormData): Promise<ActionState> {
 }
 
 export async function rejectArtisan(
-  _prevState: ActionState,
-  formData: FormData,
+  input: RejectArtisanInput,
 ): Promise<ActionState> {
-  const parsed = rejectArtisanSchema.safeParse({
-    userId: formData.get("userId"),
-    reason: formData.get("reason"),
-  });
+  const parsed = rejectArtisanSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -74,13 +71,9 @@ export async function rejectArtisan(
 }
 
 export async function requestMoreInfo(
-  _prevState: ActionState,
-  formData: FormData,
+  input: RequestMoreInfoInput,
 ): Promise<ActionState> {
-  const parsed = requestMoreInfoSchema.safeParse({
-    userId: formData.get("userId"),
-    note: formData.get("note"),
-  });
+  const parsed = requestMoreInfoSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };

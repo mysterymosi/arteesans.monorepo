@@ -1,21 +1,20 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ActionState, CategoryListItem } from "@arteesans/shared";
+import { toast } from "sonner";
+import type { CategoryFormInput, CategoryListItem } from "@arteesans/shared";
 import { endpoints } from "@/lib/endpoints";
 import { fetchJson } from "@/lib/fetch-json";
+import {
+  assertActionSuccess,
+  toastMutationError,
+} from "@/lib/mutation-toast";
 import { queryKeys } from "@/lib/query-keys";
 import {
   createCategory,
   deactivateCategory,
   updateCategory,
 } from "@/features/categories/actions/categories";
-
-function assertActionSuccess(result: ActionState) {
-  if (result.error) {
-    throw new Error(result.error);
-  }
-}
 
 export function useCategories() {
   return useQuery({
@@ -28,12 +27,14 @@ export function useCreateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      assertActionSuccess(await createCategory({}, formData));
+    mutationFn: async (input: CategoryFormInput) => {
+      assertActionSuccess(await createCategory(input));
     },
     onSuccess: () => {
+      toast.success("Category created");
       queryClient.invalidateQueries({ queryKey: queryKeys.categories.all });
     },
+    onError: (error) => toastMutationError(error, "Failed to create category"),
   });
 }
 
@@ -43,16 +44,18 @@ export function useUpdateCategory() {
   return useMutation({
     mutationFn: async ({
       categoryId,
-      formData,
+      input,
     }: {
       categoryId: string;
-      formData: FormData;
+      input: CategoryFormInput;
     }) => {
-      assertActionSuccess(await updateCategory(categoryId, {}, formData));
+      assertActionSuccess(await updateCategory(categoryId, input));
     },
     onSuccess: () => {
+      toast.success("Category updated");
       queryClient.invalidateQueries({ queryKey: queryKeys.categories.all });
     },
+    onError: (error) => toastMutationError(error, "Failed to update category"),
   });
 }
 
@@ -60,11 +63,14 @@ export function useDeactivateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      assertActionSuccess(await deactivateCategory(formData));
+    mutationFn: async (categoryId: string) => {
+      assertActionSuccess(await deactivateCategory(categoryId));
     },
     onSuccess: () => {
+      toast.success("Category deactivated");
       queryClient.invalidateQueries({ queryKey: queryKeys.categories.all });
     },
+    onError: (error) =>
+      toastMutationError(error, "Failed to deactivate category"),
   });
 }

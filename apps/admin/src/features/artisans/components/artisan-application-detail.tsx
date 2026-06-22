@@ -1,7 +1,14 @@
 "use client";
 
-import type { UseMutationResult } from "@tanstack/react-query";
-import type { ArtisanApplicationDetail } from "@arteesans/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import {
+  rejectArtisanSchema,
+  requestMoreInfoSchema,
+  type ArtisanApplicationDetail,
+  type RejectArtisanInput,
+  type RequestMoreInfoInput,
+} from "@arteesans/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +18,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useApproveArtisan,
@@ -25,27 +39,104 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function ActionForm({
-  mutation,
+function RejectArtisanForm({
   userId,
-  submitLabel,
-  children,
+  isPending,
+  onSubmit,
 }: {
-  mutation: UseMutationResult<void, Error, FormData>;
   userId: string;
-  submitLabel: string;
-  children?: React.ReactNode;
+  isPending: boolean;
+  onSubmit: (input: RejectArtisanInput, onSuccess: () => void) => void;
 }) {
+  const form = useForm<RejectArtisanInput>({
+    resolver: zodResolver(rejectArtisanSchema),
+    defaultValues: {
+      userId,
+      reason: "",
+    },
+  });
+
   return (
-    <form action={(formData) => mutation.mutate(formData)} className="space-y-3">
-      <input type="hidden" name="userId" value={userId} />
-      {children}
-      {mutation.error ? (
-        <p className="text-sm text-destructive">{mutation.error.message}</p>
-      ) : null}
-      <Button type="submit" disabled={mutation.isPending} variant="outline">
-        {submitLabel}
-      </Button>
+    <form
+      onSubmit={form.handleSubmit((input) =>
+        onSubmit(input, () => form.reset({ userId, reason: "" })),
+      )}
+    >
+      <FieldGroup>
+        <Controller
+          name="reason"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Rejection reason</FieldLabel>
+              <Textarea
+                {...field}
+                id={field.name}
+                rows={3}
+                placeholder="Rejection reason"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid ? (
+                <FieldError errors={[fieldState.error]} />
+              ) : null}
+            </Field>
+          )}
+        />
+        <Button type="submit" disabled={isPending} variant="outline">
+          {isPending ? <Spinner /> : "Reject"}
+        </Button>
+      </FieldGroup>
+    </form>
+  );
+}
+
+function RequestMoreInfoForm({
+  userId,
+  isPending,
+  onSubmit,
+}: {
+  userId: string;
+  isPending: boolean;
+  onSubmit: (input: RequestMoreInfoInput, onSuccess: () => void) => void;
+}) {
+  const form = useForm<RequestMoreInfoInput>({
+    resolver: zodResolver(requestMoreInfoSchema),
+    defaultValues: {
+      userId,
+      note: "",
+    },
+  });
+
+  return (
+    <form
+      onSubmit={form.handleSubmit((input) =>
+        onSubmit(input, () => form.reset({ userId, note: "" })),
+      )}
+    >
+      <FieldGroup>
+        <Controller
+          name="note"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>More information needed</FieldLabel>
+              <Textarea
+                {...field}
+                id={field.name}
+                rows={3}
+                placeholder="What additional information is needed?"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid ? (
+                <FieldError errors={[fieldState.error]} />
+              ) : null}
+            </Field>
+          )}
+        />
+        <Button type="submit" disabled={isPending} variant="outline">
+          {isPending ? <Spinner /> : "Request more info"}
+        </Button>
+      </FieldGroup>
     </form>
   );
 }
@@ -123,43 +214,29 @@ export function ArtisanApplicationDetailView({
             <CardTitle>Review actions</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 lg:grid-cols-3">
-            <form action={(formData) => approveMutation.mutate(formData)}>
-              <input type="hidden" name="userId" value={application.userId} />
-              {approveMutation.error ? (
-                <p className="mb-3 text-sm text-destructive">
-                  {approveMutation.error.message}
-                </p>
-              ) : null}
-              <Button type="submit" disabled={approveMutation.isPending}>
-                Approve
+            <div>
+              <Button
+                type="button"
+                disabled={approveMutation.isPending}
+                onClick={() => approveMutation.mutate(application.userId)}
+              >
+                {approveMutation.isPending ? <Spinner /> : "Approve"}
               </Button>
-            </form>
-
-            <ActionForm
-              mutation={rejectMutation}
+            </div>
+            <RejectArtisanForm
               userId={application.userId}
-              submitLabel="Reject"
-            >
-              <Textarea
-                name="reason"
-                placeholder="Rejection reason"
-                required
-                rows={3}
-              />
-            </ActionForm>
-
-            <ActionForm
-              mutation={moreInfoMutation}
+              isPending={rejectMutation.isPending}
+              onSubmit={(input, onSuccess) =>
+                rejectMutation.mutate(input, { onSuccess })
+              }
+            />
+            <RequestMoreInfoForm
               userId={application.userId}
-              submitLabel="Request more info"
-            >
-              <Textarea
-                name="note"
-                placeholder="What additional information is needed?"
-                required
-                rows={3}
-              />
-            </ActionForm>
+              isPending={moreInfoMutation.isPending}
+              onSubmit={(input, onSuccess) =>
+                moreInfoMutation.mutate(input, { onSuccess })
+              }
+            />
           </CardContent>
         </Card>
       ) : null}

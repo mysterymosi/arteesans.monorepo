@@ -1,24 +1,16 @@
 "use server";
 
-import { categoryFormSchema, type ActionState } from "@arteesans/shared";
+import {
+  categoryFormSchema,
+  type ActionState,
+  type CategoryFormInput,
+} from "@arteesans/shared";
 import { logAdminAction } from "@/features/audit";
 import {
   createServiceCategory,
   deactivateServiceCategory,
   updateServiceCategory,
 } from "@/features/categories/services/categories.service";
-
-function parseCategoryForm(formData: FormData) {
-  return categoryFormSchema.safeParse({
-    name: formData.get("name"),
-    slug: formData.get("slug"),
-    description: formData.get("description") || undefined,
-    startingPriceMin: formData.get("startingPriceMin") || null,
-    startingPriceMax: formData.get("startingPriceMax") || null,
-    sortOrder: formData.get("sortOrder") || 0,
-    isActive: formData.get("isActive") === "on",
-  });
-}
 
 async function logCategoryAction(
   actionType: string,
@@ -34,10 +26,9 @@ async function logCategoryAction(
 }
 
 export async function createCategory(
-  _prevState: ActionState,
-  formData: FormData,
+  input: CategoryFormInput,
 ): Promise<ActionState> {
-  const parsed = parseCategoryForm(formData);
+  const parsed = categoryFormSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -55,10 +46,9 @@ export async function createCategory(
 
 export async function updateCategory(
   categoryId: string,
-  _prevState: ActionState,
-  formData: FormData,
+  input: CategoryFormInput,
 ): Promise<ActionState> {
-  const parsed = parseCategoryForm(formData);
+  const parsed = categoryFormSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -74,9 +64,8 @@ export async function updateCategory(
   return {};
 }
 
-export async function deactivateCategory(formData: FormData): Promise<ActionState> {
-  const categoryId = formData.get("categoryId");
-  if (typeof categoryId !== "string" || !categoryId) {
+export async function deactivateCategory(categoryId: string): Promise<ActionState> {
+  if (!categoryId) {
     return { error: "Invalid input" };
   }
 

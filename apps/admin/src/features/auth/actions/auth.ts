@@ -1,19 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { loginSchema, type ActionState } from "@arteesans/shared";
+import { loginSchema, type ActionState, type LoginInput } from "@arteesans/shared";
 import { signInAdmin, signOutAdmin } from "@/features/auth/services/auth.service";
 
 export type AuthActionState = ActionState;
 
-export async function signIn(
-  _prevState: AuthActionState,
-  formData: FormData,
-): Promise<AuthActionState> {
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
+export async function signIn(input: LoginInput): Promise<AuthActionState> {
+  const parsed = loginSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid credentials" };
