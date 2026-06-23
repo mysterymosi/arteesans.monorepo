@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ArtisanApplicationListItem } from "@arteesans/shared";
-import { DataTableColumnHeader } from "@/components/data-table";
+import { DataTableColumnHeader, TableRowActions } from "@/components/data-table";
 import { VerificationStatusBadge } from "@/components/status-badge";
 import { formatDateTime } from "@/lib/format";
 
@@ -60,16 +60,19 @@ export const artisanApplicationColumns: ColumnDef<ArtisanApplicationListItem>[] 
   {
     id: "actions",
     enableHiding: false,
-    header: () => <div className="text-right">Action</div>,
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => (
-      <div className="text-right">
-        <Link
-          href={`/artisans/applications/${row.original.userId}`}
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          Review
-        </Link>
-      </div>
+      <TableRowActions
+        label="Open application actions"
+        actions={[
+          {
+            label: "Review application",
+            render: (
+              <Link href={`/artisans/applications/${row.original.userId}`} />
+            ),
+          },
+        ]}
+      />
     ),
   },
 ];

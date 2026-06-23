@@ -37,12 +37,19 @@ const verificationTones: Record<
   more_info: "info",
 };
 
+function formatStatus(value: string) {
+  return value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function RequestStatusBadge({
   status,
 }: {
   status: ServiceRequestListItem["status"];
 }) {
-  return <Badge variant={requestStatusTones[status]}>{status}</Badge>;
+  return <Badge variant={requestStatusTones[status]}>{formatStatus(status)}</Badge>;
 }
 
 export function RequestUrgencyBadge({
@@ -50,7 +57,7 @@ export function RequestUrgencyBadge({
 }: {
   urgency: ServiceRequestListItem["urgency"];
 }) {
-  return <Badge variant={urgencyTones[urgency]}>{urgency}</Badge>;
+  return <Badge variant={urgencyTones[urgency]}>{formatStatus(urgency)}</Badge>;
 }
 
 export function VerificationStatusBadge({
@@ -58,13 +65,13 @@ export function VerificationStatusBadge({
 }: {
   status: ArtisanApplicationListItem["verificationStatus"];
 }) {
-  return <Badge variant={verificationTones[status]}>{status}</Badge>;
+  return <Badge variant={verificationTones[status]}>{formatStatus(status)}</Badge>;
 }
 
 export function CategoryStatusBadge({ isActive }: { isActive: boolean }) {
   return (
     <Badge variant={isActive ? "success" : "secondary"}>
-      {isActive ? "active" : "inactive"}
+      {isActive ? "Active" : "Inactive"}
     </Badge>
   );
 }

@@ -4,18 +4,10 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { CategoryListItem } from "@arteesans/shared";
 import { DataTableColumnHeader } from "@/components/data-table";
 import { CategoryStatusBadge } from "@/components/status-badge";
-import { Button } from "@/components/ui/button";
 import { formatNaira } from "@/lib/format";
+import { CategoriesActions } from "./categories-actions";
 
-export function getCategoryColumns({
-  onEdit,
-  onDeactivate,
-  isDeactivating,
-}: {
-  onEdit: (category: CategoryListItem) => void;
-  onDeactivate: (categoryId: string) => void;
-  isDeactivating?: boolean;
-}): ColumnDef<CategoryListItem>[] {
+export function getCategoryColumns(): ColumnDef<CategoryListItem>[] {
   return [
     {
       accessorKey: "name",
@@ -62,29 +54,7 @@ export function getCategoryColumns({
       id: "actions",
       enableHiding: false,
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(row.original)}
-          >
-            Edit
-          </Button>
-          {row.original.isActive ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isDeactivating}
-              onClick={() => onDeactivate(row.original.id)}
-            >
-              Deactivate
-            </Button>
-          ) : null}
-        </div>
-      ),
+      cell: ({ row }) => <CategoriesActions category={row.original} />,
     },
   ];
 }

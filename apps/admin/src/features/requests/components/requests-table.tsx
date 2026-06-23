@@ -22,6 +22,7 @@ export function RequestsTable({
     >
       {({ fetchData }) => (
         <DataTable
+          title="Service Requests"
           columns={requestColumns}
           emptyMessage="No service requests match the current filters."
           errorMessage="Unable to load service requests."

@@ -56,19 +56,19 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.2645 0 89.88);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2645 0 89.88);
+  --background: oklch(0.985 0.004 253.14);
+  --foreground: oklch(0.215 0.018 253.14);
+  --card: oklch(0.998 0.001 253.14);
+  --card-foreground: oklch(0.215 0.018 253.14);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2645 0 89.88);
   --primary: oklch(0.4564 0.1173 253.14);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.9672 0.0041 271.37);
-  --secondary-foreground: oklch(0.2645 0 89.88);
-  --muted: oklch(0.9672 0.0041 271.37);
+  --secondary: oklch(0.944 0.011 253.14);
+  --secondary-foreground: oklch(0.215 0.018 253.14);
+  --muted: oklch(0.944 0.011 253.14);
   --muted-foreground: oklch(0.408 0.0346 263.13);
-  --accent: oklch(0.9517 0.0148 251.16);
+  --accent: oklch(0.932 0.026 253.14);
   --accent-foreground: oklch(0.3378 0.0997 254.3);
   --destructive: oklch(0.5912 0.2123 22.97);
   --destructive-muted: oklch(0.9527 0.0208 10.21);
@@ -78,7 +78,7 @@
   --warning-muted: oklch(0.9778 0.0239 85.79);
   --info: oklch(0.4564 0.1173 253.14);
   --info-muted: oklch(0.9517 0.0148 251.16);
-  --border: oklch(0.937 0 89.88);
+  --border: oklch(0.88 0.015 253.14);
   --input: oklch(0.8715 0.0123 259.82);
   --ring: oklch(0.4564 0.1173 253.14);
   --chart-1: oklch(0.4564 0.1173 253.14);
@@ -87,13 +87,13 @@
   --chart-4: oklch(0.8088 0.1704 75.35);
   --chart-5: oklch(0.5912 0.2123 22.97);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0.003 253.14);
-  --sidebar-foreground: oklch(0.2645 0 89.88);
+  --sidebar: oklch(0.995 0.001 253.14);
+  --sidebar-foreground: oklch(0.215 0.018 253.14);
   --sidebar-primary: oklch(0.4564 0.1173 253.14);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.9517 0.0148 251.16);
   --sidebar-accent-foreground: oklch(0.3378 0.0997 254.3);
-  --sidebar-border: oklch(0.937 0 89.88);
+  --sidebar-border: oklch(0.88 0.015 253.14);
   --sidebar-ring: oklch(0.4564 0.1173 253.14);
 }
 
