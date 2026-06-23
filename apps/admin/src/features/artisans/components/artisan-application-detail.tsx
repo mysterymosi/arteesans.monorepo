@@ -9,15 +9,11 @@ import {
   type RejectArtisanInput,
   type RequestMoreInfoInput,
 } from "@arteesans/shared";
-import { Badge } from "@/components/ui/badge";
+import { CategoryIcon } from "@/components/category-icon";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { DetailBackButton } from "@/components/detail-back-button";
+import { VerificationStatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Field,
   FieldError,
@@ -31,12 +27,44 @@ import {
   useRejectArtisan,
   useRequestMoreInfo,
 } from "@/features/artisans/hooks/use-artisan-applications";
+import {
+  CalendarIcon,
+  DownloadIcon,
+  FileTextIcon,
+  MapPinIcon,
+} from "lucide-react";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-NG", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function Panel({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-lg border bg-card">
+      <div className="border-b px-4 py-3">
+        <h2 className="text-sm font-semibold">{title}</h2>
+      </div>
+      <div className="p-4">{children}</div>
+    </section>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[8rem_minmax(0,1fr)] gap-4 text-sm">
+      <dt className="text-muted-foreground font-medium text-[13px]">{label}</dt>
+      <dd className="min-w-0 font-medium">{value}</dd>
+    </div>
+  );
 }
 
 function RejectArtisanForm({
@@ -50,10 +78,7 @@ function RejectArtisanForm({
 }) {
   const form = useForm<RejectArtisanInput>({
     resolver: zodResolver(rejectArtisanSchema),
-    defaultValues: {
-      userId,
-      reason: "",
-    },
+    defaultValues: { userId, reason: "" },
   });
 
   return (
@@ -73,7 +98,7 @@ function RejectArtisanForm({
                 {...field}
                 id={field.name}
                 rows={3}
-                placeholder="Rejection reason"
+                placeholder="Explain why this application is being rejected"
                 aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid ? (
@@ -101,10 +126,7 @@ function RequestMoreInfoForm({
 }) {
   const form = useForm<RequestMoreInfoInput>({
     resolver: zodResolver(requestMoreInfoSchema),
-    defaultValues: {
-      userId,
-      note: "",
-    },
+    defaultValues: { userId, note: "" },
   });
 
   return (
@@ -119,12 +141,12 @@ function RequestMoreInfoForm({
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>More information needed</FieldLabel>
+              <FieldLabel htmlFor={field.name}>Information needed</FieldLabel>
               <Textarea
                 {...field}
                 id={field.name}
                 rows={3}
-                placeholder="What additional information is needed?"
+                placeholder="Tell the applicant what to provide"
                 aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid ? (
@@ -154,92 +176,162 @@ export function ArtisanApplicationDetailView({
     application.verificationStatus === "more_info";
 
   return (
-    <div className="flex flex-col gap-4 px-4 lg:px-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline">{application.verificationStatus}</Badge>
-        <span className="text-sm text-muted-foreground">
-          Submitted {formatDate(application.submittedAt)}
-        </span>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{application.name}</CardTitle>
-            <CardDescription>{application.primarySkill ?? "No primary skill"}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div>{application.email ?? "No email"}</div>
-            <div>{application.phone ?? "No phone"}</div>
-            <div>{application.state ?? "No state"}</div>
-            <div>{application.address ?? "No address"}</div>
-            <div>{application.availability ?? "No availability set"}</div>
-            <div>{application.yearsExperience ?? "No experience listed"}</div>
-            {application.bio ? <p>{application.bio}</p> : null}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Verification documents</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {application.documents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No documents uploaded.</p>
-            ) : (
-              application.documents.map((doc) => (
-                <div key={doc.id} className="rounded-lg border p-3 text-sm">
-                  <div className="font-medium">{doc.docType}</div>
-                  <div className="text-muted-foreground">{doc.fileName ?? "Document"}</div>
-                  {doc.url ? (
-                    <a
-                      href={doc.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 inline-block text-primary hover:underline"
-                    >
-                      View document
-                    </a>
-                  ) : null}
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {canReview ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Review actions</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6 lg:grid-cols-3">
-            <div>
-              <Button
-                type="button"
-                disabled={approveMutation.isPending}
-                onClick={() => approveMutation.mutate(application.userId)}
-              >
-                {approveMutation.isPending ? <Spinner /> : "Approve"}
-              </Button>
+    <div className="flex flex-col gap-5 px-4 lg:px-6">
+      <DetailBackButton href="/artisans/applications">
+        Applications
+      </DetailBackButton>
+      <section className="overflow-hidden rounded-lg border bg-card">
+        <div className="flex flex-col gap-5 px-5 py-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="grid size-16 place-items-center rounded-full bg-muted text-xl font-semibold">
+              {application.name.slice(0, 2).toUpperCase()}
             </div>
-            <RejectArtisanForm
-              userId={application.userId}
-              isPending={rejectMutation.isPending}
-              onSubmit={(input, onSuccess) =>
-                rejectMutation.mutate(input, { onSuccess })
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl font-semibold">{application.name}</h1>
+                <VerificationStatusBadge status={application.verificationStatus} />
+              </div>
+              <div className="mt-1 flex flex-wrap gap-5 text-[13px] font-medium text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <CategoryIcon
+                    categoryName={application.primarySkill}
+                    className="size-4"
+                  />
+                  {application.primarySkill ?? "No skill"}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <MapPinIcon className="size-4" />
+                  {application.state ?? "No state"}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CalendarIcon className="size-4" />
+                  Submitted {formatDate(application.submittedAt)}
+                </span>
+              </div>
+            </div>
+          </div>
+          {canReview ? (
+            <ConfirmDialog
+              trigger={
+                <Button
+                  type="button"
+                  disabled={approveMutation.isPending}
+                  className="px-9"
+                >
+                  Approve
+                </Button>
               }
+              title="Approve artisan?"
+              description={`This will approve ${application.name} and allow the artisan profile to move forward.`}
+              confirmLabel="Approve"
+              isPending={approveMutation.isPending}
+              onConfirm={() => approveMutation.mutate(application.userId)}
             />
-            <RequestMoreInfoForm
-              userId={application.userId}
-              isPending={moreInfoMutation.isPending}
-              onSubmit={(input, onSuccess) =>
-                moreInfoMutation.mutate(input, { onSuccess })
-              }
-            />
-          </CardContent>
-        </Card>
-      ) : null}
+          ) : null}
+        </div>
+      </section>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_26rem]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <Panel title="Profile">
+            <dl className="grid gap-4 md:grid-cols-2">
+              <Row label="Full name" value={application.name} />
+              <Row label="Email" value={application.email ?? "No email"} />
+              <Row label="Phone" value={application.phone ?? "No phone"} />
+              <Row label="State" value={application.state ?? "No state"} />
+              <Row label="Address" value={application.address ?? "No address"} />
+              <Row
+                label="Availability"
+                value={application.availability ?? "No availability set"}
+              />
+              <Row
+                label="Experience"
+                value={application.yearsExperience ?? "No experience listed"}
+              />
+              <Row
+                label="Bio"
+                value={application.bio ?? "No bio provided"}
+              />
+            </dl>
+          </Panel>
+
+          <Panel title="Verification documents">
+            {application.documents.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No documents uploaded. Request more information before approving.
+              </p>
+            ) : (
+              <div className="grid gap-3">
+                {application.documents.map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 rounded-md border p-3 text-sm hover:bg-accent"
+                  >
+                    <FileTextIcon className="size-5 text-primary" />
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">
+                        {doc.fileName ?? doc.docType}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {doc.docType}
+                      </div>
+                    </div>
+                    <DownloadIcon className="ml-auto size-4 text-muted-foreground" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </Panel>
+        </div>
+
+        <aside className="flex flex-col gap-5">
+          <Panel title="Decision">
+            <div className="grid gap-5">
+              {canReview ? (
+                <>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        type="button"
+                        disabled={approveMutation.isPending}
+                        className="w-full"
+                      >
+                        Approve artisan
+                      </Button>
+                    }
+                    title="Approve artisan?"
+                    description={`This will approve ${application.name} and allow the artisan profile to move forward.`}
+                    confirmLabel="Approve artisan"
+                    isPending={approveMutation.isPending}
+                    onConfirm={() => approveMutation.mutate(application.userId)}
+                  />
+                  <RejectArtisanForm
+                    userId={application.userId}
+                    isPending={rejectMutation.isPending}
+                    onSubmit={(input, onSuccess) =>
+                      rejectMutation.mutate(input, { onSuccess })
+                    }
+                  />
+                  <RequestMoreInfoForm
+                    userId={application.userId}
+                    isPending={moreInfoMutation.isPending}
+                    onSubmit={(input, onSuccess) =>
+                      moreInfoMutation.mutate(input, { onSuccess })
+                    }
+                  />
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  This application is no longer pending review.
+                </p>
+              )}
+            </div>
+          </Panel>
+        </aside>
+      </div>
     </div>
   );
 }

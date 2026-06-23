@@ -16,9 +16,8 @@ import {
 import {
   LayoutDashboardIcon,
   ListIcon,
-  UsersIcon,
   TagsIcon,
-  CommandIcon,
+  UsersIcon,
 } from "lucide-react";
 
 const navItems = [
@@ -33,7 +32,7 @@ const navItems = [
     icon: <ListIcon />,
   },
   {
-    title: "Artisan Applications",
+    title: "Applications",
     url: "/artisans/applications",
     icon: <UsersIcon />,
   },
@@ -55,24 +54,32 @@ export function AppSidebar({
   };
 }) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar
+      collapsible="offcanvas"
+      className="**:data-[slot=sidebar-inner]:bg-card **:data-[slot=sidebar-inner]:text-foreground"
+      {...props}
+    >
+      <SidebarHeader className="border-b border-border bg-card px-3 py-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
+              className="h-auto gap-3 rounded-lg px-1 py-0 hover:bg-transparent data-[slot=sidebar-menu-button]:p-1!"
               render={<Link href="/" />}
             >
-              <CommandIcon className="size-5!" />
-              <span className="text-base font-semibold">Arteesans Admin</span>
+              <span className="grid size-9 place-items-center rounded-md bg-primary text-lg font-bold text-primary-foreground shadow-sm">
+                A
+              </span>
+              <span className="text-lg font-semibold text-foreground">
+                Arteesans Admin
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-card px-2 py-3">
         <NavMain items={navItems} />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-border bg-card p-3">
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

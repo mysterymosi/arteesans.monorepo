@@ -1,6 +1,7 @@
 "use client";
 
 import { SectionCards } from "@/components/section-cards";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-stats";
 
@@ -9,19 +10,24 @@ export function DashboardStatsPanel() {
 
   if (isPending) {
     return (
-      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
-        <Skeleton className="h-32 rounded-xl" />
-        <Skeleton className="h-32 rounded-xl" />
-        <Skeleton className="h-32 rounded-xl" />
+      <div className="grid max-w-5xl gap-3 px-4 md:grid-cols-3 lg:px-6">
+        <Skeleton className="h-40 rounded-lg" />
+        <Skeleton className="h-40 rounded-lg" />
+        <Skeleton className="h-40 rounded-lg" />
       </div>
     );
   }
 
   if (isError || !data) {
     return (
-      <p className="px-4 text-sm text-destructive lg:px-6">
-        Unable to load dashboard stats.
-      </p>
+      <div className="px-4 lg:px-6">
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load overview</AlertTitle>
+          <AlertDescription>
+            Dashboard workload totals are unavailable right now.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 

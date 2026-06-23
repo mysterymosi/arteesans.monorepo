@@ -3,16 +3,33 @@
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ServiceRequestListItem } from "@arteesans/shared";
-import { DataTableColumnHeader } from "@/components/data-table";
-import { Badge } from "@/components/ui/badge";
-import { formatDateTime } from "@/lib/format";
+import { CategoryIcon } from "@/components/category-icon";
+import { DataTableColumnHeader, TableRowActions } from "@/components/data-table";
+import { RequestStatusBadge } from "@/components/status-badge";
+import { cn } from "@/lib/utils";
+
+
+function formatTime(value: string) {
+  return new Intl.DateTimeFormat("en-NG", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(value));
+}
+
+const urgencyDotClass: Record<ServiceRequestListItem["urgency"], string> = {
+  emergency: "bg-destructive",
+  urgent: "bg-destructive",
+  normal: "bg-warning",
+  flexible: "bg-primary",
+};
 
 export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
   {
     accessorKey: "customerName",
-    meta: { label: "Customer" },
+    meta: { label: "Client" },
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Customer" />
+      <DataTableColumnHeader column={column} title="Client" />
     ),
     cell: ({ row }) => (
       <div className="min-w-56">
@@ -29,6 +46,15 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Category" />
     ),
+    cell: ({ row }) => (
+      <span className="inline-flex items-center gap-2 font-medium">
+        <CategoryIcon
+          categoryName={row.original.categoryName}
+          className="size-4 text-muted-foreground"
+        />
+        {row.original.categoryName}
+      </span>
+    ),
   },
   {
     accessorKey: "status",
@@ -36,7 +62,7 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <Badge variant="outline">{row.original.status}</Badge>,
+    cell: ({ row }) => <RequestStatusBadge status={row.original.status} />,
   },
   {
     accessorKey: "urgency",
@@ -44,28 +70,46 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Urgency" />
     ),
+    cell: ({ row }) => (
+      <span className="inline-flex items-center gap-2 font-medium">
+        <span
+          className={cn("size-2 rounded-full", urgencyDotClass[row.original.urgency])}
+        />
+        {row.original.urgency.charAt(0).toUpperCase() +
+          row.original.urgency.slice(1)}
+      </span>
+    ),
   },
   {
     accessorKey: "createdAt",
-    meta: { label: "Created" },
+    meta: { label: "Updated" },
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created" />
+      <DataTableColumnHeader column={column} title="Updated" />
     ),
-    cell: ({ row }) => formatDateTime(row.original.createdAt),
+    cell: ({ row }) => <span className="text-muted-foreground uppercase font-medium">{formatTime(row.original.createdAt)}</span>,
   },
   {
     id: "actions",
     enableHiding: false,
-    header: () => <div className="text-right">Action</div>,
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => (
-      <div className="text-right">
-        <Link
-          href={`/requests/${row.original.id}`}
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          View
-        </Link>
-      </div>
+      <TableRowActions
+        label="Open request actions"
+        actions={[
+          {
+            label: "View request",
+            render: <Link href={`/requests/${row.original.id}`} />,
+          },
+          ...(row.original.status === "matching"
+            ? [
+                {
+                  label: "Match artisan",
+                  render: <Link href={`/requests/${row.original.id}/match`} />,
+                },
+              ]
+            : []),
+        ]}
+      />
     ),
   },
 ];

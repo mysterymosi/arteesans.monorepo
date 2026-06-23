@@ -22,58 +22,83 @@ export function DataTablePagination<TData>({
 }) {
   const { pageIndex, pageSize } = table.getState().pagination;
   const pageCount = table.getPageCount();
+  const start = totalRows === 0 ? 0 : pageIndex * pageSize + 1;
+  const end = Math.min(totalRows, (pageIndex + 1) * pageSize);
+  const pages = Array.from(
+    { length: Math.min(pageCount, 3) },
+    (_, index) => index,
+  );
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-      <div className="text-sm text-muted-foreground">
-        {totalRows} total {totalRows === 1 ? "row" : "rows"}
+    <div className="grid items-center gap-3 md:grid-cols-[1fr_auto_1fr]">
+      <div className="text-sm font-medium text-foreground">
+        {start}-{end} of {totalRows}
       </div>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium">Rows</p>
-          <Select
-            value={`${pageSize}`}
-            onValueChange={(value) => table.setPageSize(Number(value))}
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <ChevronLeftIcon />
+          <span className="sr-only">Previous page</span>
+        </Button>
+        {pages.map((page) => (
+          <Button
+            key={page}
+            type="button"
+            variant={page === pageIndex ? "default" : "ghost"}
+            size="icon-sm"
+            onClick={() => table.setPageIndex(page)}
           >
-            <SelectTrigger size="sm" className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {PAGE_SIZE_OPTIONS.map((size) => (
-                  <SelectItem key={size} value={`${size}`}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="text-sm font-medium">
-          Page {pageIndex + 1} of {pageCount}
-        </div>
-        <div className="flex items-center gap-2">
+            {page + 1}
+          </Button>
+        ))}
+        {pageCount > 4 ? (
+          <span className="px-2 text-sm text-muted-foreground">...</span>
+        ) : null}
+        {pageCount > 3 ? (
           <Button
             type="button"
-            variant="outline"
+            variant={pageCount - 1 === pageIndex ? "default" : "ghost"}
             size="icon-sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => table.setPageIndex(pageCount - 1)}
           >
-            <ChevronLeftIcon />
-            <span className="sr-only">Previous page</span>
+            {pageCount}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <ChevronRightIcon />
-            <span className="sr-only">Next page</span>
-          </Button>
-        </div>
+        ) : null}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          <ChevronRightIcon />
+          <span className="sr-only">Next page</span>
+        </Button>
+      </div>
+      <div className="flex justify-start md:justify-end">
+        <Select
+          value={`${pageSize}`}
+          onValueChange={(value) => table.setPageSize(Number(value))}
+        >
+          <SelectTrigger size="sm" className="h-10 w-32 rounded-md">
+            <SelectValue />
+            <span className="text-muted-foreground">/ page</span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size} / page
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

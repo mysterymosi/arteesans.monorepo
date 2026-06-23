@@ -45,11 +45,11 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="border-0 ring-0">
         <CardHeader>
-          <CardTitle>Arteesans Admin</CardTitle>
+          <CardTitle>Sign in</CardTitle>
           <CardDescription>
-            Sign in with your admin account to manage requests and artisans.
+            Use your admin account to continue.
           </CardDescription>
         </CardHeader>
         <CardContent>

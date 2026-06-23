@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { REQUEST_STATUSES, URGENCY_LEVELS } from "@arteesans/shared";
 import { DashboardPage } from "@/components/dashboard-shell";
+import { PageHeader } from "@/components/page-header";
 import { createQueryClient } from "@/lib/query-client";
 import { queryKeys } from "@/lib/query-keys";
 import { normalizePagination } from "@/lib/pagination";
@@ -40,6 +41,10 @@ export default async function RequestsPage({
   return (
     <DashboardPage title="Service requests">
       <HydrationBoundary state={dehydrate(queryClient)}>
+        <PageHeader
+          title="Service requests"
+          description="Review incoming customer requests, filter the queue, and open requests for matching."
+        />
         <RequestsPageClient />
       </HydrationBoundary>
     </DashboardPage>

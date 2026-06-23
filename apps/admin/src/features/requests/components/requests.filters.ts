@@ -25,8 +25,8 @@ export function createRequestTableFilters(
     },
     {
       key: "urgency",
-      label: "Urgency",
-      allLabel: "All urgency",
+      label: "Priority",
+      allLabel: "All priorities",
       className: "w-40",
       options: URGENCY_LEVELS.map((urgency) => ({
         label: urgency,

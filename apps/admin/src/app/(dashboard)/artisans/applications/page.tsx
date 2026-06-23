@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { VERIFICATION_STATUSES } from "@arteesans/shared";
 import { DashboardPage } from "@/components/dashboard-shell";
+import { PageHeader } from "@/components/page-header";
 import { createQueryClient } from "@/lib/query-client";
 import { queryKeys } from "@/lib/query-keys";
 import { normalizePagination } from "@/lib/pagination";
@@ -30,6 +31,10 @@ export default async function ArtisanApplicationsPage({
   return (
     <DashboardPage title="Artisan applications">
       <HydrationBoundary state={dehydrate(queryClient)}>
+        <PageHeader
+          title="Artisan applications"
+          description="Review artisan profiles, verification documents, and approval decisions."
+        />
         <ArtisanApplicationsClient />
       </HydrationBoundary>
     </DashboardPage>
