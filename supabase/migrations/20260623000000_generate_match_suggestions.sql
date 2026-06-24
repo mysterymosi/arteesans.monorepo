@@ -98,6 +98,7 @@ as $$
       1.0::double precision as category_score,
       case
         when c.distance_meters is null then 0.0
+        when p_max_radius_meters <= 0 then 0.0
         else greatest(0.0, 1.0 - (c.distance_meters / p_max_radius_meters))
       end as location_score,
       (least(greatest(c.average_rating::double precision, 0.0), 5.0) / 5.0) as rating_score,
@@ -139,4 +140,4 @@ as $$
 $$;
 
 grant execute on function public.generate_match_suggestions(uuid, double precision)
-  to authenticated, service_role;
+  to service_role;

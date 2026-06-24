@@ -27,7 +27,11 @@ export async function getMatchSuggestions(
     p_request_id: requestId,
   });
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
     return [];
   }
 

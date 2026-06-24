@@ -68,6 +68,19 @@ export default function CustomerAddressScreen() {
   const saveAddress = useSaveCustomerDefaultAddress();
   const resetSaveAddress = saveAddress.reset;
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchGenerationRef = useRef(0);
+
+  function clearDebounceTimer() {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+  }
+
+  function invalidatePendingSearch() {
+    clearDebounceTimer();
+    searchGenerationRef.current += 1;
+  }
   const [query, setQuery] = useState("");
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [selectedAddress, setSelectedAddress] =
@@ -79,17 +92,14 @@ export default function CustomerAddressScreen() {
 
   useEffect(() => {
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      clearDebounceTimer();
     };
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       return () => {
-        if (debounceRef.current) {
-          clearTimeout(debounceRef.current);
-          debounceRef.current = null;
-        }
+        invalidatePendingSearch();
 
         setQuery("");
         setPredictions([]);
@@ -108,9 +118,10 @@ export default function CustomerAddressScreen() {
     setSelectedAddress(null);
     setError(null);
 
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+    clearDebounceTimer();
 
     if (value.trim().length < 3) {
+      searchGenerationRef.current += 1;
       setPredictions([]);
       setIsSearching(false);
       return;
@@ -118,8 +129,10 @@ export default function CustomerAddressScreen() {
 
     setIsSearching(true);
     debounceRef.current = setTimeout(() => {
+      const generation = ++searchGenerationRef.current;
       void (async () => {
         const results = await fetchPlacePredictions(value);
+        if (generation !== searchGenerationRef.current) return;
         setPredictions(results);
         setIsSearching(false);
       })();
@@ -127,6 +140,7 @@ export default function CustomerAddressScreen() {
   }
 
   async function handleSelectPrediction(prediction: PlacePrediction) {
+    invalidatePendingSearch();
     setIsResolving(true);
     setError(null);
     setPredictions([]);
@@ -148,6 +162,7 @@ export default function CustomerAddressScreen() {
   }
 
   async function handleUseCurrentLocation() {
+    invalidatePendingSearch();
     setIsLocating(true);
     setError(null);
     setPredictions([]);
@@ -255,10 +270,12 @@ export default function CustomerAddressScreen() {
                   accessibilityRole="button"
                   accessibilityLabel="Clear address search"
                   onPress={() => {
+                    invalidatePendingSearch();
                     setQuery("");
                     setPredictions([]);
                     setSelectedAddress(null);
                     setError(null);
+                    setIsSearching(false);
                   }}
                   className="size-7 items-center justify-center rounded-full bg-ink-secondary/20"
                 >

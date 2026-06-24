@@ -99,9 +99,13 @@ export function RequestMatchClient({
 
   const suggestions = suggestionsQuery.data ?? [];
   const pageCount = toPageCount(suggestions.length, pagination.pageSize);
+  const pageIndex = Math.min(
+    pagination.pageIndex,
+    Math.max(0, pageCount - 1),
+  );
   const pageData = suggestions.slice(
-    pagination.pageIndex * pagination.pageSize,
-    pagination.pageIndex * pagination.pageSize + pagination.pageSize,
+    pageIndex * pagination.pageSize,
+    pageIndex * pagination.pageSize + pagination.pageSize,
   );
   const columns = React.useMemo(
     () =>
@@ -157,7 +161,7 @@ export function RequestMatchClient({
           viewportPadding={false}
           pageCount={pageCount}
           totalRows={suggestions.length}
-          pagination={pagination}
+          pagination={{ ...pagination, pageIndex }}
           onPaginationChange={setPagination}
         />
       )}

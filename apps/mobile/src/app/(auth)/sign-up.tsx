@@ -184,10 +184,13 @@ export default function SignUp() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <AddressPlacesAutocomplete
                   address={value}
-                  onAddressChange={onChange}
+                  onAddressChange={(address) => {
+                    setValue("latitude", undefined, { shouldValidate: true });
+                    setValue("longitude", undefined, { shouldValidate: true });
+                    onChange(address);
+                  }}
                   onAddressBlur={onBlur}
                   onCoordinatesChange={(coords) => {
-                    console.log("coords", coords);
                     setValue("latitude", coords.latitude, { shouldValidate: true });
                     setValue("longitude", coords.longitude, { shouldValidate: true });
                   }}
