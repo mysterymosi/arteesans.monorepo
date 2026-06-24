@@ -14,11 +14,12 @@ export const routes = {
     completeProfile: "/(auth)/complete-profile",
   },
   customer: {
-    home: "/(customer)",
-    bookings: "/(customer)/bookings",
-    profile: "/(customer)/profile",
-    newRequest: "/(customer)/request/new",
-    requestConfirmed: "/(customer)/request/confirmed",
+    home: "/(customer)/(stack)",
+    address: "/(customer)/(stack)/address",
+    bookings: "/(customer)/(stack)/bookings",
+    profile: "/(customer)/(stack)/profile",
+    newRequest: "/(customer)/(stack)/request/new",
+    requestConfirmed: "/(customer)/(stack)/request/confirmed",
   },
   artisan: {
     home: "/(artisan)",

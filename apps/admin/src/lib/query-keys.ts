@@ -20,6 +20,11 @@ export const queryKeys = {
     detail: (requestId: string | undefined) =>
       [...queryKeys.serviceRequests.details(), requestId] as const,
   },
+  matching: {
+    all: ["matching"] as const,
+    suggestions: (requestId: string | undefined) =>
+      [...queryKeys.matching.all, "suggestions", requestId] as const,
+  },
   artisanApplications: {
     all: ["artisan-applications"] as const,
     lists: () => [...queryKeys.artisanApplications.all, "list"] as const,

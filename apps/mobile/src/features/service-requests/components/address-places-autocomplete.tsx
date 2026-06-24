@@ -91,12 +91,13 @@ export const AddressPlacesAutocomplete = memo(function AddressPlacesAutocomplete
     setPredictions([]);
 
     const { coords, error: locationError } = await getCurrentCoordinates();
-    onCoordinatesChange(coords);
 
     const formattedAddress = await reverseGeocodeAddress(coords);
     if (formattedAddress) {
       onAddressChange(formattedAddress);
     }
+
+    onCoordinatesChange(coords);
 
     setLocationHint(locationError ?? "Current location captured.");
     setIsResolving(false);

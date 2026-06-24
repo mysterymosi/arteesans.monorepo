@@ -89,6 +89,30 @@ export type ServiceRequestDetail = ServiceRequestListItem & {
   longitude: number | null;
 };
 
+export type MatchScoreBreakdown = {
+  category: number;
+  location: number;
+  availability: number;
+  rating: number;
+  completion: number;
+  response: number;
+};
+
+export type MatchSuggestion = {
+  artisanId: string;
+  artisanProfileId: string;
+  artisanName: string;
+  categoryName: string | null;
+  cityLga: string | null;
+  state: string | null;
+  availability: string | null;
+  averageRating: number;
+  completedJobs: number;
+  distanceMeters: number | null;
+  score: number;
+  breakdown: MatchScoreBreakdown;
+};
+
 export type ArtisanApplicationListItem = {
   profileId: string;
   userId: string;

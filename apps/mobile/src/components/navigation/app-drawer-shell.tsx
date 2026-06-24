@@ -26,7 +26,7 @@ export function AppDrawerShell({
 
   function navigate(href: Href) {
     navigation.closeDrawer();
-    router.push(href);
+    router.replace(href);
   }
 
   async function handleSignOut() {

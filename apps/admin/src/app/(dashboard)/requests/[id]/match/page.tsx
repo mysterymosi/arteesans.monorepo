@@ -1,43 +1,44 @@
-import Link from "next/link";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { notFound, redirect } from "next/navigation";
 import { DashboardPage } from "@/components/dashboard-shell";
-import { Button } from "@/components/ui/button";
+import { createQueryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
+import { getServiceRequestDetail } from "@/features/requests";
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty";
+  getMatchSuggestions,
+  RequestMatchClient,
+} from "@/features/matching";
 
-export default async function RequestMatchPlaceholderPage({
+export default async function RequestMatchPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const queryClient = createQueryClient();
+  const request = await queryClient.ensureQueryData({
+    queryKey: queryKeys.serviceRequests.detail(id),
+    queryFn: () => getServiceRequestDetail(id),
+  });
+
+  if (!request) {
+    notFound();
+  }
+
+  if (request.status !== "matching") {
+    redirect(`/requests/${id}`);
+  }
+
+  await queryClient.prefetchQuery({
+    queryKey: queryKeys.matching.suggestions(id),
+    queryFn: () => getMatchSuggestions(id),
+  });
 
   return (
     <DashboardPage title="Match artisan">
-      <div className="px-4 lg:px-6">
-        <Empty className="border bg-card">
-          <EmptyHeader>
-            <EmptyTitle>Matching coming in Phase 1.6</EmptyTitle>
-            <EmptyDescription>
-              Ranked artisan suggestions and manual assignment will be built in the
-              matching epic.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button
-              nativeButton={false}
-              render={<Link href={`/requests/${id}`} />}
-              variant="outline"
-            >
-              Back to request
-            </Button>
-          </EmptyContent>
-        </Empty>
-      </div>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <RequestMatchClient request={request} />
+      </HydrationBoundary>
     </DashboardPage>
   );
 }

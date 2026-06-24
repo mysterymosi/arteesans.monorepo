@@ -3,6 +3,7 @@ export { CustomerDrawerContent, type CustomerDrawerContentProps } from "./compon
 export { CustomerSearchBar } from "./components/customer-search-bar";
 export { HomeIcon } from "./components/home-icon";
 export { useCustomerDefaultAddress } from "./hooks/use-customer-default-address";
+export { useSaveCustomerDefaultAddress } from "./hooks/use-save-customer-default-address";
 export {
   formatAddressLocationLabel,
   formatDefaultAddressText,
