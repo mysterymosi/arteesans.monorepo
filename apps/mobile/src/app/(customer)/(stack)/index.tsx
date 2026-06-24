@@ -78,16 +78,22 @@ export default function CustomerHome() {
           <View className="mt-4 flex-row items-start justify-between gap-4">
             <View className="flex-1">
               <Text className="font-medium text-2xl text-ink">Hello {firstName},</Text>
-              <View className="mt-1 min-w-0 flex-row items-center gap-1.5">
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Update your location"
+                onPress={() => router.push(routes.customer.address)}
+                className="mt-1 min-w-0 flex-row items-center gap-1.5 active:opacity-75"
+              >
                 <Image source={icons.location} style={{ width: 16, height: 16 }} contentFit="contain" />
                 <Text
-                  className="min-w-0 flex-1 text-sm text-ink-secondary"
+                  className="min-w-0 text-sm text-ink-secondary"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
                   {locationLabel}
                 </Text>
-              </View>
+                <Image source={icons.chevronDown} style={{ width: 12, height: 12 }} contentFit="contain" />
+              </Pressable>
             </View>
             <Button
               size="sm"

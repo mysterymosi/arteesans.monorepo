@@ -1,8 +1,6 @@
 import { Drawer } from "expo-router/drawer";
 import { CustomerDrawerContent, type CustomerDrawerContentProps } from "@/features/customer";
 
-const hiddenDrawerItem = { drawerItemStyle: { display: "none" as const }, title: "" };
-
 export default function CustomerLayout() {
   return (
     <Drawer
@@ -15,16 +13,10 @@ export default function CustomerLayout() {
         drawerStyle: { width: "78%" },
         overlayColor: "rgba(0,0,0,0.35)",
         swipeEdgeWidth: 48,
+        drawerItemStyle: { display: "none" },
       }}
     >
-      <Drawer.Screen name="index" options={hiddenDrawerItem} />
-      <Drawer.Screen name="bookings" options={{ ...hiddenDrawerItem, swipeEnabled: false }} />
-      <Drawer.Screen name="profile" options={hiddenDrawerItem} />
-      <Drawer.Screen name="request/new" options={{ ...hiddenDrawerItem, swipeEnabled: false }} />
-      <Drawer.Screen
-        name="request/confirmed"
-        options={{ ...hiddenDrawerItem, swipeEnabled: false }}
-      />
+      <Drawer.Screen name="(stack)" options={{ swipeEnabled: false }} />
     </Drawer>
   );
 }

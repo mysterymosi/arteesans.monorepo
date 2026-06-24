@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import type { Coordinates } from "@/lib/geo";
 
 export type CustomerDefaultAddress = {
   line1: string;
@@ -6,6 +7,13 @@ export type CustomerDefaultAddress = {
   state: string | null;
   latitude: number | null;
   longitude: number | null;
+};
+
+export type SaveCustomerDefaultAddressInput = {
+  line1: string;
+  cityLga?: string | null;
+  state?: string | null;
+  coords?: Coordinates | null;
 };
 
 function parseLocationCoords(location: unknown): {
@@ -63,6 +71,23 @@ export async function fetchCustomerDefaultAddress(): Promise<CustomerDefaultAddr
     latitude: coords?.latitude ?? null,
     longitude: coords?.longitude ?? null,
   };
+}
+
+export async function saveCustomerDefaultAddress(
+  input: SaveCustomerDefaultAddressInput,
+): Promise<void> {
+  const { error } = await supabase.rpc(
+    "upsert_customer_default_address" as never,
+    {
+      p_line1: input.line1,
+      p_state: input.state ?? null,
+      p_city_lga: input.cityLga ?? null,
+      p_latitude: input.coords?.latitude ?? null,
+      p_longitude: input.coords?.longitude ?? null,
+    } as never,
+  );
+
+  if (error) throw error;
 }
 
 export function formatDefaultAddressText(

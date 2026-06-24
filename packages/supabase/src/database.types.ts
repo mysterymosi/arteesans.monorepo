@@ -481,6 +481,31 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      generate_match_suggestions: {
+        Args: {
+          p_request_id: string
+          p_max_radius_meters?: number
+        }
+        Returns: {
+          artisan_id: string
+          artisan_profile_id: string
+          artisan_name: string
+          category_name: string | null
+          city_lga: string | null
+          state: string | null
+          availability: Database["public"]["Enums"]["availability"] | null
+          average_rating: number
+          completed_jobs: number
+          distance_meters: number | null
+          score: number
+          category_score: number
+          location_score: number
+          availability_score: number
+          rating_score: number
+          completion_score: number
+          response_score: number
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_approved_artisan: { Args: never; Returns: boolean }
     }

@@ -1,9 +1,9 @@
 export function isCustomerHomePath(pathname: string): boolean {
   return (
-    pathname === "/(customer)" ||
-    pathname === "/(customer)/" ||
-    pathname.endsWith("/(customer)") ||
-    pathname.endsWith("/(customer)/index")
+    pathname === "/(customer)/(stack)" ||
+    pathname === "/(customer)/(stack)/" ||
+    pathname.endsWith("/(customer)/(stack)") ||
+    pathname.endsWith("/(customer)/(stack)/index")
   );
 }
 

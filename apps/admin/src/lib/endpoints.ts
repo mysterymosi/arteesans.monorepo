@@ -45,6 +45,10 @@ export const endpoints = {
     list: "/api/requests",
     detail: (requestId: string) => `/api/requests/${requestId}`,
   },
+  matching: {
+    suggestions: (requestId: string) =>
+      `/api/matching/${requestId}/suggestions`,
+  },
   artisanApplications: {
     list: "/api/artisans/applications",
     detail: (userId: string) => `/api/artisans/applications/${userId}`,
