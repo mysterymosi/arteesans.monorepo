@@ -1,13 +1,17 @@
 "use server";
 
+import { after } from "next/server";
 import {
   rejectArtisanSchema,
   requestMoreInfoSchema,
+  buildVerificationApprovedPush,
+  buildVerificationRejectedPush,
   type ActionState,
   type RejectArtisanInput,
   type RequestMoreInfoInput,
 } from "@arteesans/shared";
 import { logAdminAction } from "@/features/audit";
+import { sendPushNotification } from "@/lib/push/send-push";
 import { updateArtisanVerificationStatus } from "@/features/artisans/services/artisans.service";
 
 async function logArtisanDecision(input: {
@@ -43,6 +47,14 @@ export async function approveArtisan(userId: string): Promise<ActionState> {
     userId,
     previousStatus: result.previousStatus,
   });
+
+  after(async () => {
+    await sendPushNotification({
+      user_ids: [userId],
+      ...buildVerificationApprovedPush(),
+    });
+  });
+
   return {};
 }
 
@@ -67,6 +79,14 @@ export async function rejectArtisan(
     previousStatus: result.previousStatus,
     reason: parsed.data.reason,
   });
+
+  after(async () => {
+    await sendPushNotification({
+      user_ids: [parsed.data.userId],
+      ...buildVerificationRejectedPush(),
+    });
+  });
+
   return {};
 }
 

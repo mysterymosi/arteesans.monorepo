@@ -1,5 +1,6 @@
 import type { UrgencyLevel } from "@arteesans/shared";
 import { supabase } from "@/lib/supabase";
+import { notifyRequestCreated } from "@/features/notifications";
 import { uploadRequestPhotos } from "@/features/service-requests/services/request-media.service";
 
 export type CreateServiceRequestInput = {
@@ -38,5 +39,8 @@ export async function createServiceRequest(
   if (error) throw error;
   if (!data) throw new Error("Request could not be created.");
 
-  return data as string;
+  const requestId = data as string;
+  void notifyRequestCreated(requestId);
+
+  return requestId;
 }

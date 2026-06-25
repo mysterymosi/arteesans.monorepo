@@ -1,11 +1,18 @@
 import type { MatchSuggestion } from "@arteesans/shared";
+import {
+  buildArtisanMatchedArtisanPush,
+  buildArtisanMatchedCustomerPush,
+} from "@arteesans/shared";
+import { sendPushNotifications } from "@/lib/push/send-push";
 import { createServiceClient } from "@/lib/supabase/server";
+import { after } from "next/server";
 
 type AssignArtisanResult =
   | { error: string }
   | {
       requestId: string;
       artisanId: string;
+      customerId: string;
       previousStatus: "matching";
     };
 
@@ -69,7 +76,7 @@ export async function assignArtisanToRequest({
 
   const { data: request, error: requestError } = await service
     .from("service_requests")
-    .select("id, status")
+    .select("id, status, customer_id")
     .eq("id", requestId)
     .maybeSingle();
 
@@ -114,9 +121,23 @@ export async function assignArtisanToRequest({
     return { error: "Request is no longer available for matching." };
   }
 
+  after(async () => {
+    await sendPushNotifications([
+      {
+        user_ids: [request.customer_id],
+        ...buildArtisanMatchedCustomerPush(requestId),
+      },
+      {
+        user_ids: [artisanId],
+        ...buildArtisanMatchedArtisanPush(requestId),
+      },
+    ]);
+  });
+
   return {
     requestId,
     artisanId,
+    customerId: request.customer_id,
     previousStatus: "matching",
   };
 }
