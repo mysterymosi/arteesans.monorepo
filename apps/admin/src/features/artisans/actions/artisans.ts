@@ -3,11 +3,14 @@
 import {
   rejectArtisanSchema,
   requestMoreInfoSchema,
+  buildVerificationApprovedPush,
+  buildVerificationRejectedPush,
   type ActionState,
   type RejectArtisanInput,
   type RequestMoreInfoInput,
 } from "@arteesans/shared";
 import { logAdminAction } from "@/features/audit";
+import { sendPushNotification } from "@/lib/push/send-push";
 import { updateArtisanVerificationStatus } from "@/features/artisans/services/artisans.service";
 
 async function logArtisanDecision(input: {
@@ -43,6 +46,12 @@ export async function approveArtisan(userId: string): Promise<ActionState> {
     userId,
     previousStatus: result.previousStatus,
   });
+
+  void sendPushNotification({
+    user_ids: [userId],
+    ...buildVerificationApprovedPush(),
+  });
+
   return {};
 }
 
@@ -67,6 +76,12 @@ export async function rejectArtisan(
     previousStatus: result.previousStatus,
     reason: parsed.data.reason,
   });
+
+  void sendPushNotification({
+    user_ids: [parsed.data.userId],
+    ...buildVerificationRejectedPush(),
+  });
+
   return {};
 }
 

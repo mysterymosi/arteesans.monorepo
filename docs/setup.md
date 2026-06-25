@@ -7,6 +7,7 @@ Infrastructure that requires account access and cannot be automated from the rep
 - Project ref: `cpzbnkyqigqcssqjzhoh` (org Mosi, eu-west-1)
 - Dashboard: https://supabase.com/dashboard/project/cpzbnkyqigqcssqjzhoh
 - Migrations are applied via MCP/CLI from `supabase/migrations/`
+- Edge Functions: `send-push`, `notify-request-created`, `notify-artisan-application` in `supabase/functions/`
 
 ## Resend SMTP (email OTP) — TODO
 
@@ -20,23 +21,52 @@ Infrastructure that requires account access and cannot be automated from the rep
 
 Until SMTP is configured, Supabase's built-in email (rate-limited, dev-only) delivers OTPs.
 
-## EAS (Expo builds) — TODO
+## EAS (Expo builds)
 
 ```bash
 cd apps/mobile
 npx eas login
-npx eas init        # links the project, writes projectId into app.json
 ```
 
-`eas.json` profiles (development/preview/production) are already in the repo.
+`eas.json` profiles (development/preview/production) and EAS project ID are already in [apps/mobile/app.config.ts](/apps/mobile/app.config.ts).
 
-## FCM (Android push) — TODO
+## Push notifications (FCM + APNs)
 
-1. Create a Firebase project, add an Android app with package name from `app.json`
-2. Download `google-services.json` into `apps/mobile/`
-3. Upload the FCM V1 service account key: `npx eas credentials` → Android → Push notifications
+### Android (FCM)
 
-iOS push uses APNs via EAS credentials (`npx eas credentials` → iOS).
+1. Firebase project **arteesans-75ef6** — Android app package **`com.arteesans.app`** (from `app.config.ts`)
+2. `google-services.json` lives in `apps/mobile/`
+3. Upload the **FCM HTTP v1 service account key** (Firebase → Project settings → Service accounts → Generate new private key):
+   ```bash
+   cd apps/mobile
+   npx eas credentials
+   ```
+   → Android → your build profile → **Push Notifications**
+
+This is **not** the same JSON as the Play Store submission service account.
+
+### iOS (APNs)
+
+```bash
+cd apps/mobile
+npx eas credentials
+```
+
+→ iOS → your build profile → configure **Push Notifications** (APNs key or certificate via EAS).
+
+### Deploy Edge Functions
+
+```bash
+supabase functions deploy send-push
+supabase functions deploy notify-request-created
+supabase functions deploy notify-artisan-application
+```
+
+`send-push` is service-role only. Mobile apps call the authenticated `notify-*` functions after request creation or artisan onboarding submit.
+
+### Test on device
+
+Push tokens are not registered on simulators. Use a physical device with a development or preview EAS build.
 
 ## Google Maps / Places
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "348260677617",
+    "project_id": "arteesans-75ef6",
+    "storage_bucket": "arteesans-75ef6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:348260677617:android:81f3a04cd296a029ff7650",
+        "android_client_info": {
+          "package_name": "com.arteesans.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaBcV63VHk-Dtzoo8JcFZkf2WyTcPIjyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

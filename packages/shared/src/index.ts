@@ -5,3 +5,4 @@ export * from "./schemas/auth";
 export * from "./schemas/service-request";
 export * from "./schemas/artisan";
 export * from "./schemas/admin";
+export * from "./schemas/notifications";

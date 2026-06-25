@@ -1,5 +1,6 @@
 import type { ArtisanGuarantorsInput, Availability } from "@arteesans/shared";
 import { supabase } from "@/lib/supabase";
+import { notifyArtisanApplication } from "@/features/notifications";
 import { fetchServiceCategories } from "@/features/service-requests/services/categories.service";
 import {
   fetchArtisanProfile,
@@ -127,6 +128,8 @@ export async function submitArtisanOnboarding(
   if (metadataError) {
     return { error: metadataError.message };
   }
+
+  void notifyArtisanApplication(profile.id);
 
   return { profile: await fetchArtisanProfile(input.userId) ?? profile };
 }
