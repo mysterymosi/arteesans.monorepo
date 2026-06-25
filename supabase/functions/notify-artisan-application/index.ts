@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
   const { data: profile, error: profileError } = await authClient
     .from("artisan_profiles")
-    .select("id, user_id, verification_status")
+    .select("id, user_id, verification_status, application_notified_at")
     .eq("id", profileId)
     .maybeSingle();
 
@@ -80,9 +80,31 @@ Deno.serve(async (req) => {
 
   try {
     const service = createServiceSupabase();
+
+    if (profile.application_notified_at) {
+      return jsonResponse({ ok: true, sent: 0, removed: 0, failed: 0, failures: [] });
+    }
+
+    const { data: claimed, error: claimError } = await service
+      .from("artisan_profiles")
+      .update({ application_notified_at: new Date().toISOString() })
+      .eq("id", profileId)
+      .eq("verification_status", "pending")
+      .is("application_notified_at", null)
+      .select("id")
+      .maybeSingle();
+
+    if (claimError) {
+      return jsonResponse({ error: claimError.message }, 500);
+    }
+
+    if (!claimed) {
+      return jsonResponse({ ok: true, sent: 0, removed: 0, failed: 0, failures: [] });
+    }
+
     const adminIds = await fetchActiveAdminUserIds(service);
     if (adminIds.length === 0) {
-      return jsonResponse({ ok: true, sent: 0, removed: 0 });
+      return jsonResponse({ ok: true, sent: 0, removed: 0, failed: 0, failures: [] });
     }
 
     const push = buildArtisanApplicationPush(profileId);

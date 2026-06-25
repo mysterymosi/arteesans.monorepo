@@ -7,6 +7,9 @@ type NotifyRequestBody = {
   request_id?: string;
 };
 
+const REQUEST_LOOKUP_FAILED = "Failed to verify request";
+const PUSH_NOTIFY_FAILED = "Failed to send push notification";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return corsPreflightResponse();
@@ -63,7 +66,11 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (requestError) {
-    return jsonResponse({ error: requestError.message }, 500);
+    console.error(
+      "notify-request-created request lookup failed:",
+      requestError.message,
+    );
+    return jsonResponse({ error: REQUEST_LOOKUP_FAILED }, 500);
   }
 
   if (!request || request.customer_id !== user.id) {
@@ -80,10 +87,10 @@ Deno.serve(async (req) => {
 
     return jsonResponse({ ok: true, ...result });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to send push notification";
-    return jsonResponse({ error: message }, 500);
+    console.error(
+      "notify-request-created push failed:",
+      error instanceof Error ? error.message : error,
+    );
+    return jsonResponse({ error: PUSH_NOTIFY_FAILED }, 500);
   }
 });

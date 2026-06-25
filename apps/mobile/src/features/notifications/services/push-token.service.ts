@@ -3,16 +3,12 @@ import * as Device from "expo-device";
 import { supabase } from "@/lib/supabase";
 import { registerForPushNotifications } from "@/lib/notifications";
 
-export async function upsertPushToken(userId: string, token: string): Promise<void> {
-  const { error } = await supabase.from("push_tokens").upsert(
-    {
-      user_id: userId,
-      expo_push_token: token,
-      platform: Platform.OS,
-      device_name: Device.deviceName ?? null,
-    },
-    { onConflict: "user_id,expo_push_token" },
-  );
+export async function upsertPushToken(token: string): Promise<void> {
+  const { error } = await supabase.rpc("register_push_token" as never, {
+    p_expo_push_token: token,
+    p_platform: Platform.OS,
+    p_device_name: Device.deviceName ?? null,
+  } as never);
 
   if (error) {
     throw error;
@@ -23,7 +19,7 @@ export async function syncPushTokenForUser(userId: string): Promise<void> {
   const token = await registerForPushNotifications();
   if (!token) return;
 
-  await upsertPushToken(userId, token);
+  await upsertPushToken(token);
 }
 
 export async function notifyRequestCreated(requestId: string): Promise<void> {

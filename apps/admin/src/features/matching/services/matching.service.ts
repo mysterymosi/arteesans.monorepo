@@ -5,6 +5,7 @@ import {
 } from "@arteesans/shared";
 import { sendPushNotifications } from "@/lib/push/send-push";
 import { createServiceClient } from "@/lib/supabase/server";
+import { after } from "next/server";
 
 type AssignArtisanResult =
   | { error: string }
@@ -120,16 +121,18 @@ export async function assignArtisanToRequest({
     return { error: "Request is no longer available for matching." };
   }
 
-  void sendPushNotifications([
-    {
-      user_ids: [request.customer_id],
-      ...buildArtisanMatchedCustomerPush(requestId),
-    },
-    {
-      user_ids: [artisanId],
-      ...buildArtisanMatchedArtisanPush(requestId),
-    },
-  ]);
+  after(async () => {
+    await sendPushNotifications([
+      {
+        user_ids: [request.customer_id],
+        ...buildArtisanMatchedCustomerPush(requestId),
+      },
+      {
+        user_ids: [artisanId],
+        ...buildArtisanMatchedArtisanPush(requestId),
+      },
+    ]);
+  });
 
   return {
     requestId,

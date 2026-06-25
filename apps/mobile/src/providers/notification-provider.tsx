@@ -51,7 +51,7 @@ function routeFromPushData(
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { session } = useAuthSession();
-  const { profile } = useAuthProfile();
+  const { profile, isProfileLoading } = useAuthProfile();
 
   useEffect(() => {
     const userId = session?.user.id;
@@ -62,23 +62,28 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, [session?.user.id]);
 
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+    if (isProfileLoading) return;
+
+    const routeNotificationResponse = (
+      response: Notifications.NotificationResponse,
+    ) => {
       const rawData = response.notification.request.content.data;
       if (!isPushNotificationData(rawData)) return;
       routeFromPushData(rawData, profile?.role);
-    });
+    };
+
+    const subscription =
+      Notifications.addNotificationResponseReceivedListener(routeNotificationResponse);
 
     void Notifications.getLastNotificationResponseAsync().then((response) => {
       if (!response) return;
-      const rawData = response.notification.request.content.data;
-      if (!isPushNotificationData(rawData)) return;
-      routeFromPushData(rawData, profile?.role);
+      routeNotificationResponse(response);
     });
 
     return () => {
       subscription.remove();
     };
-  }, [profile?.role]);
+  }, [isProfileLoading, profile?.role]);
 
   return children;
 }

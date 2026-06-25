@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
+const EXPO_PUSH_TIMEOUT_MS = 10_000;
 
 export type PushPayload = {
   user_ids: string[];
@@ -25,6 +26,30 @@ function chunk<T>(items: T[], size: number): T[][] {
     chunks.push(items.slice(index, index + size));
   }
   return chunks;
+}
+
+async function sendExpoPushBatch(messages: unknown[]): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), EXPO_PUSH_TIMEOUT_MS);
+
+  try {
+    return await fetch(EXPO_PUSH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(messages),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`Expo push request timed out after ${EXPO_PUSH_TIMEOUT_MS}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export function createServiceSupabase(): SupabaseClient {
@@ -52,7 +77,7 @@ export function isServiceRoleRequest(req: Request): boolean {
 export async function sendPushToUsers(
   supabase: SupabaseClient,
   input: PushPayload,
-): Promise<{ sent: number; removed: number }> {
+): Promise<{ sent: number; removed: number; failed: number; failures: string[] }> {
   const { data: tokenRows, error } = await supabase
     .from("push_tokens")
     .select("id, expo_push_token")
@@ -64,11 +89,13 @@ export async function sendPushToUsers(
 
   const tokens = (tokenRows ?? []) as PushTokenRow[];
   if (tokens.length === 0) {
-    return { sent: 0, removed: 0 };
+    return { sent: 0, removed: 0, failed: 0, failures: [] };
   }
 
   let sent = 0;
   let removed = 0;
+  let failed = 0;
+  const failures = new Set<string>();
 
   for (const batch of chunk(tokens, 100)) {
     const messages = batch.map((row) => ({
@@ -79,14 +106,7 @@ export async function sendPushToUsers(
       sound: "default",
     }));
 
-    const response = await fetch(EXPO_PUSH_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(messages),
-    });
+    const response = await sendExpoPushBatch(messages);
 
     if (!response.ok) {
       throw new Error(
@@ -116,11 +136,15 @@ export async function sendPushToUsers(
         if (!deleteError) {
           removed += 1;
         }
+        continue;
       }
+
+      failed += 1;
+      failures.add(ticket.details?.error ?? "unknown");
     }
   }
 
-  return { sent, removed };
+  return { sent, removed, failed, failures: [...failures] };
 }
 
 export async function fetchActiveAdminUserIds(

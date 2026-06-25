@@ -1,5 +1,6 @@
 "use server";
 
+import { after } from "next/server";
 import {
   rejectArtisanSchema,
   requestMoreInfoSchema,
@@ -47,9 +48,11 @@ export async function approveArtisan(userId: string): Promise<ActionState> {
     previousStatus: result.previousStatus,
   });
 
-  void sendPushNotification({
-    user_ids: [userId],
-    ...buildVerificationApprovedPush(),
+  after(async () => {
+    await sendPushNotification({
+      user_ids: [userId],
+      ...buildVerificationApprovedPush(),
+    });
   });
 
   return {};
@@ -77,9 +80,11 @@ export async function rejectArtisan(
     reason: parsed.data.reason,
   });
 
-  void sendPushNotification({
-    user_ids: [parsed.data.userId],
-    ...buildVerificationRejectedPush(),
+  after(async () => {
+    await sendPushNotification({
+      user_ids: [parsed.data.userId],
+      ...buildVerificationRejectedPush(),
+    });
   });
 
   return {};

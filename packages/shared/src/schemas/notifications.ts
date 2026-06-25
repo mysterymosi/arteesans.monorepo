@@ -11,10 +11,32 @@ export const pushNotificationTypes = [
 
 export type PushNotificationType = (typeof pushNotificationTypes)[number];
 
-export const pushNotificationDataSchema = z.object({
-  type: z.enum(pushNotificationTypes),
-  entity_id: z.string().uuid().optional(),
-});
+export const pushNotificationDataSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("request_received"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("artisan_matched"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("artisan_application"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("matching_started"),
+    entity_id: z.string().uuid().optional(),
+  }),
+  z.object({
+    type: z.literal("verification_approved"),
+    entity_id: z.string().uuid().optional(),
+  }),
+  z.object({
+    type: z.literal("verification_rejected"),
+    entity_id: z.string().uuid().optional(),
+  }),
+]);
 
 export type PushNotificationData = z.infer<typeof pushNotificationDataSchema>;
 
