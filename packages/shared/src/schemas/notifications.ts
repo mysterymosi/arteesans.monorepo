@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { REQUEST_STATUSES, type RequestStatus } from "../constants/status";
 
 export const pushNotificationTypes = [
   "request_received",
@@ -30,7 +31,7 @@ export const pushNotificationDataSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("job_status_updated"),
     entity_id: z.string().uuid(),
-    status: z.string().optional(),
+    status: z.enum(REQUEST_STATUSES),
   }),
   z.object({
     type: z.literal("job_reassigned"),
@@ -99,7 +100,7 @@ export function buildJobAcceptanceRequiredPush(requestId: string): Omit<SendPush
 
 export function buildJobStatusUpdatedPush(
   requestId: string,
-  status: string,
+  status: RequestStatus,
 ): Omit<SendPushInput, "user_ids"> {
   return {
     title: "Job update",

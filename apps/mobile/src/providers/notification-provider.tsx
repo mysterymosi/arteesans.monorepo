@@ -49,6 +49,8 @@ function routeFromPushData(
           router.push(artisanJobRoute(data.entity_id));
           return;
         }
+        router.push(routes.artisan.jobs);
+        return;
       }
       router.push(routes.customer.bookings);
       return;

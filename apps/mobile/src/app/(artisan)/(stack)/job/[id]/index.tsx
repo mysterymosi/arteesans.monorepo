@@ -15,7 +15,7 @@ import { JOB_ACCEPT_TIMEOUT_MINUTES } from "@arteesans/shared";
 
 export default function ArtisanJobDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: job, isLoading } = useArtisanJob(id);
+  const { data: job, isLoading, isError } = useArtisanJob(id);
   const acceptJob = useAcceptJob();
   const rejectJob = useRejectJob();
 
@@ -27,12 +27,28 @@ export default function ArtisanJobDetailScreen() {
     return Math.ceil(remainingMs / 60_000);
   }, [job?.accept_deadline_at]);
 
-  if (isLoading || !job) {
+  if (isLoading) {
     return (
       <View className="flex-1 bg-surface">
         <ScreenHeader title="Job details" />
         <View className="flex-1 items-center justify-center">
           <Text className="text-ink-secondary">Loading job...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (isError || !job) {
+    return (
+      <View className="flex-1 bg-surface">
+        <ScreenHeader title="Job details" />
+        <View className="flex-1 items-center justify-center gap-4 px-5">
+          <Text className="text-center text-ink-secondary">
+            {isError
+              ? "Could not load this job. Please try again."
+              : "This job is no longer available."}
+          </Text>
+          <Button title="Go back" variant="outline" onPress={() => router.back()} />
         </View>
       </View>
     );

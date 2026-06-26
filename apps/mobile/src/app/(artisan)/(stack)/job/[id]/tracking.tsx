@@ -7,10 +7,10 @@ import { getNextArtisanJobStatus } from "@arteesans/shared";
 
 export default function ArtisanJobTrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: job, isLoading } = useArtisanJob(id);
+  const { data: job, isLoading, isError } = useArtisanJob(id);
   const updateStatus = useUpdateJobStatus();
 
-  if (isLoading || !job) {
+  if (isLoading) {
     return (
       <View className="flex-1 bg-surface">
         <ScreenHeader title="Active tracking" />
@@ -21,7 +21,24 @@ export default function ArtisanJobTrackingScreen() {
     );
   }
 
-  const nextStatus = getNextArtisanJobStatus(job.status);
+  if (isError || !job) {
+    return (
+      <View className="flex-1 bg-surface">
+        <ScreenHeader title="Active tracking" />
+        <View className="flex-1 items-center justify-center gap-4 px-5">
+          <Text className="text-center text-ink-secondary">
+            {isError
+              ? "Could not load this job. Please try again."
+              : "This job is no longer available."}
+          </Text>
+          <Button title="Go back" variant="outline" onPress={() => router.back()} />
+        </View>
+      </View>
+    );
+  }
+
+  const nextStatus =
+    job.status === "in_progress" ? null : getNextArtisanJobStatus(job.status);
   const nextLabel = nextStatus ? nextStatus.replaceAll("_", " ") : null;
 
   const handleAdvance = async () => {
@@ -29,9 +46,6 @@ export default function ArtisanJobTrackingScreen() {
 
     try {
       await updateStatus.mutateAsync({ requestId: job.id, status: nextStatus });
-      if (nextStatus === "in_progress") {
-        router.push(artisanJobCompleteRoute(job.id));
-      }
     } catch (error) {
       Alert.alert(
         "Could not update status",
@@ -51,18 +65,16 @@ export default function ArtisanJobTrackingScreen() {
           Update the customer as you progress through the job.
         </Text>
         <JobStatusStepper status={job.status} />
-        {nextStatus ? (
+        {job.status === "in_progress" ? (
+          <Button
+            title="Mark job complete"
+            onPress={() => router.push(artisanJobCompleteRoute(job.id))}
+          />
+        ) : nextStatus ? (
           <Button
             title={`Mark as ${nextLabel}`}
             loading={updateStatus.isPending}
             onPress={handleAdvance}
-          />
-        ) : null}
-        {job.status === "in_progress" ? (
-          <Button
-            title="Complete job"
-            variant="secondary"
-            onPress={() => router.push(artisanJobCompleteRoute(job.id))}
           />
         ) : null}
       </ScrollView>

@@ -40,7 +40,9 @@ export default function ArtisanJobsScreen() {
 
         <View className="gap-3">
           <Text className="font-medium text-base text-ink">Completed</Text>
-          {completedJobs.length > 0 ? (
+          {isLoading ? (
+            <Text className="text-sm text-ink-secondary">Loading jobs...</Text>
+          ) : completedJobs.length > 0 ? (
             completedJobs.map((job) => (
               <ArtisanJobRow
                 key={job.id}

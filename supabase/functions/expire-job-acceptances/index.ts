@@ -3,7 +3,7 @@ import {
   buildJobReassignedPush,
   buildJobStatusUpdatedPush,
 } from "../_shared/notifications.ts";
-import { createServiceSupabase, sendPushToUsers } from "../_shared/push.ts";
+import { createServiceSupabase, fetchActiveAdminUserIds, sendPushToUsers } from "../_shared/push.ts";
 
 type ExpiredJobRow = {
   request_id: string;
@@ -29,6 +29,8 @@ Deno.serve(async (req) => {
 
   try {
     const service = createServiceSupabase();
+    const adminIds = await fetchActiveAdminUserIds(service);
+
     const { data, error } = await service.rpc("expire_stale_job_acceptances");
 
     if (error) {
@@ -37,30 +39,50 @@ Deno.serve(async (req) => {
     }
 
     const expired = (data ?? []) as ExpiredJobRow[];
-    const adminIds = await fetchAdminUserIds(service);
 
     for (const row of expired) {
       const requestId = row.request_id;
 
       if (row.customer_id) {
-        await sendPushToUsers(service, {
-          user_ids: [row.customer_id],
-          ...buildJobStatusUpdatedPush(requestId, "matching"),
-        });
+        try {
+          await sendPushToUsers(service, {
+            user_ids: [row.customer_id],
+            ...buildJobStatusUpdatedPush(requestId, "matching"),
+          });
+        } catch (error) {
+          console.error(
+            `expire-job-acceptances customer push failed for ${requestId}:`,
+            error instanceof Error ? error.message : error,
+          );
+        }
       }
 
       if (row.previous_artisan_id) {
-        await sendPushToUsers(service, {
-          user_ids: [row.previous_artisan_id],
-          ...buildJobStatusUpdatedPush(requestId, "matching"),
-        });
+        try {
+          await sendPushToUsers(service, {
+            user_ids: [row.previous_artisan_id],
+            ...buildJobStatusUpdatedPush(requestId, "matching"),
+          });
+        } catch (error) {
+          console.error(
+            `expire-job-acceptances artisan push failed for ${requestId}:`,
+            error instanceof Error ? error.message : error,
+          );
+        }
       }
 
       if (adminIds.length > 0) {
-        await sendPushToUsers(service, {
-          user_ids: adminIds,
-          ...buildJobReassignedPush(requestId),
-        });
+        try {
+          await sendPushToUsers(service, {
+            user_ids: adminIds,
+            ...buildJobReassignedPush(requestId),
+          });
+        } catch (error) {
+          console.error(
+            `expire-job-acceptances admin push failed for ${requestId}:`,
+            error instanceof Error ? error.message : error,
+          );
+        }
       }
     }
 
@@ -73,19 +95,3 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Failed to process expirations" }, 500);
   }
 });
-
-async function fetchAdminUserIds(
-  service: ReturnType<typeof createServiceSupabase>,
-): Promise<string[]> {
-  const { data, error } = await service
-    .from("users")
-    .select("id")
-    .eq("role", "admin");
-
-  if (error) {
-    console.error("expire-job-acceptances admin lookup failed:", error.message);
-    return [];
-  }
-
-  return (data ?? []).map((row) => row.id);
-}
