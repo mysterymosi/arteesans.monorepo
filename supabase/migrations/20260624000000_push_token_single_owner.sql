@@ -8,7 +8,10 @@ where id not in (
 );
 
 alter table public.push_tokens
-  drop constraint push_tokens_user_id_expo_push_token_key;
+  drop constraint if exists push_tokens_user_id_expo_push_token_key;
+
+alter table public.push_tokens
+  drop constraint if exists push_tokens_expo_push_token_key;
 
 alter table public.push_tokens
   add constraint push_tokens_expo_push_token_key unique (expo_push_token);

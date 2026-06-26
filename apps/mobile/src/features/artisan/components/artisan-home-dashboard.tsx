@@ -1,12 +1,25 @@
-import { ScrollView, View } from "react-native";
+import { useEffect } from "react";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { MenuButton } from "@/components/navigation";
 import { Text } from "@/components/ui";
+import {
+  ArtisanJobRow,
+  IncomingJobCard,
+  isActiveArtisanJob,
+  isIncomingAcceptanceJob,
+  useArtisanJobs,
+  useRejectJob,
+} from "@/features/artisan-jobs";
 import { icons } from "@/constants/icons";
+import { artisanJobRoute, routes } from "@/lib/routes";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/cn";
 import type { VerificationStatus } from "@arteesans/shared";
-import { colors } from "@/theme";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
+import { useAuthSession } from "@/providers/auth-provider";
 
 type ArtisanHomeDashboardProps = {
   firstName: string;
@@ -40,7 +53,7 @@ function StatCard({
   );
 }
 
-/** Artisan home dashboard — Figma 36:2476 with approval-pending gate per Phase 1.4 */
+/** Artisan home dashboard — Figma 36:2476 */
 export function ArtisanHomeDashboard({
   firstName,
   city,
@@ -48,6 +61,67 @@ export function ArtisanHomeDashboard({
 }: ArtisanHomeDashboardProps) {
   const isApproved = verificationStatus === "approved";
   const greeting = firstName ? `Hello ${firstName},` : "Hello,";
+  const { session } = useAuthSession();
+  const queryClient = useQueryClient();
+  const { data: jobs = [] } = useArtisanJobs();
+  const rejectJob = useRejectJob();
+
+  useEffect(() => {
+    const userId = session?.user.id;
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`artisan-jobs:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "service_requests",
+          filter: `assigned_artisan_id=eq.${userId}`,
+        },
+        () => {
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.artisanJobs.list(userId),
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient, session?.user.id]);
+
+  const incomingJob = jobs.find(isIncomingAcceptanceJob);
+  const recentJobs = jobs
+    .filter((job) => isActiveArtisanJob(job) && !isIncomingAcceptanceJob(job))
+    .slice(0, 3);
+  const completedCount = jobs.filter((job) => job.status === "completed").length;
+
+  const handleRejectIncoming = () => {
+    if (!incomingJob) return;
+    Alert.alert("Decline job?", "This request will return to matching for another artisan.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Decline",
+        style: "destructive",
+        onPress: () => {
+          rejectJob.mutate(
+            { requestId: incomingJob.id },
+            {
+              onError: (error) => {
+                Alert.alert(
+                  "Could not decline job",
+                  error instanceof Error ? error.message : "Please try again.",
+                );
+              },
+            },
+          );
+        },
+      },
+    ]);
+  };
 
   return (
     <ScrollView
@@ -92,19 +166,19 @@ export function ArtisanHomeDashboard({
 
         <View className="flex-row gap-3">
           <StatCard
-            value="₦10,000"
+            value="₦0"
             label="Today's earnings"
             icon={icons.orderApprove}
             iconBgClassName="bg-success-subtle"
           />
           <StatCard
-            value="3"
+            value={String(completedCount)}
             label="Jobs done"
             icon={icons.categories.repair}
             iconBgClassName="bg-primary-subtle"
           />
           <StatCard
-            value="4.8"
+            value="—"
             label="Rating"
             icon={icons.categories.hammer}
             iconBgClassName="bg-warning-subtle"
@@ -114,113 +188,46 @@ export function ArtisanHomeDashboard({
 
       {isApproved ? (
         <>
-          <View className="gap-5">
-            <View className="flex-row items-center justify-between">
-              <Text className="font-medium text-base text-ink">New Requests</Text>
-              <Text className="font-light text-sm text-ink-secondary">Just now</Text>
-            </View>
-
-            <View className="gap-3 rounded-[20px] bg-surface-muted p-5 shadow-sm">
+          {incomingJob ? (
+            <View className="gap-5">
               <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-1">
-                  <View className="rounded-full bg-danger-subtle px-2.5 py-1">
-                    <Text className="font-medium text-sm text-danger">Emergency</Text>
-                  </View>
-                  <Text className="text-base text-ink-secondary">Plumbing</Text>
-                </View>
-                <Text className="font-semibold text-base text-primary">₦3,000</Text>
+                <Text className="font-medium text-base text-ink">New Requests</Text>
+                <Text className="font-light text-sm text-ink-secondary">Just now</Text>
               </View>
-              <View>
-                <Text className="font-medium text-sm text-ink">Folake Adesina</Text>
-                <Text className="text-xs text-ink-secondary">Lekki, Lagos</Text>
-              </View>
-              <Text className="text-xs text-ink">
-                Kitchen sink is leaking badly under the cabinet. Water is pooling on...
-              </Text>
-              <View className="flex-row items-center gap-3">
-                <LinearGradient
-                  colors={[...colors.primaryGradient]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{ flex: 1, borderRadius: 4 }}
-                >
-                  <View className="items-center py-1.5">
-                    <Text className="font-medium text-xs text-white">View details</Text>
-                  </View>
-                </LinearGradient>
-                <View className="h-6 w-6 items-center justify-center rounded bg-surface">
-                  <Image source={icons.xMark} style={{ width: 12, height: 12 }} contentFit="contain" />
-                </View>
-              </View>
+              <IncomingJobCard
+                job={incomingJob}
+                onReject={handleRejectIncoming}
+                isRejecting={rejectJob.isPending}
+              />
             </View>
-          </View>
+          ) : null}
 
           <View className="gap-5">
             <View className="flex-row items-center justify-between">
               <Text className="font-medium text-base text-ink">Recent Jobs</Text>
-              <Text className="font-semibold text-sm text-primary underline">See All</Text>
+              <Pressable accessibilityRole="button" onPress={() => router.push(routes.artisan.jobs)}>
+                <Text className="font-semibold text-sm text-primary underline">See All</Text>
+              </Pressable>
             </View>
 
-            <JobRow
-              title="Plumbing"
-              subtitle="Kitchen sink"
-              status="In Process"
-              statusBgClassName="bg-warning-subtle"
-              statusTextClassName="text-warning"
-              icon={icons.categories.water}
-            />
-            <JobRow
-              title="Electrical"
-              subtitle="Electronics"
-              status="Delivered"
-              statusBgClassName="bg-success-subtle"
-              statusTextClassName="text-success"
-              icon={icons.categories.electricBolt}
-            />
-            <JobRow
-              title="Driving"
-              subtitle="Chauffeur"
-              status="Cancelled"
-              statusBgClassName="bg-danger-subtle"
-              statusTextClassName="text-danger"
-              icon={icons.categories.steering}
-            />
+            {recentJobs.length > 0 ? (
+              recentJobs.map((job) => (
+                <ArtisanJobRow
+                  key={job.id}
+                  job={job}
+                  onPress={() => router.push(artisanJobRoute(job.id))}
+                />
+              ))
+            ) : (
+              <View className="rounded-2xl border border-line bg-surface-muted px-4 py-6">
+                <Text className="text-center text-sm text-ink-secondary">
+                  No active jobs yet. New matches will appear here.
+                </Text>
+              </View>
+            )}
           </View>
         </>
       ) : null}
     </ScrollView>
-  );
-}
-
-function JobRow({
-  title,
-  subtitle,
-  status,
-  statusBgClassName,
-  statusTextClassName,
-  icon,
-}: {
-  title: string;
-  subtitle: string;
-  status: string;
-  statusBgClassName: string;
-  statusTextClassName: string;
-  icon: number;
-}) {
-  return (
-    <View className="flex-row items-center justify-between rounded-2xl border border-line bg-surface-muted p-2.5 shadow-sm">
-      <View className="flex-row items-center gap-3">
-        <View className="h-8 w-8 items-center justify-center rounded-full bg-primary-muted">
-          <Image source={icon} style={{ width: 14, height: 14 }} contentFit="contain" />
-        </View>
-        <View>
-          <Text className="font-medium text-sm text-ink">{title}</Text>
-          <Text className="text-[10px] text-ink-secondary">{subtitle}</Text>
-        </View>
-      </View>
-      <View className={cn("rounded-full px-2.5 py-1", statusBgClassName)}>
-        <Text className={cn("font-semibold text-xs", statusTextClassName)}>{status}</Text>
-      </View>
-    </View>
   );
 }

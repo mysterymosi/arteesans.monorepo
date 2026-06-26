@@ -9,9 +9,9 @@ export function isCustomerHomePath(pathname: string): boolean {
 
 export function isArtisanHomePath(pathname: string): boolean {
   return (
-    pathname === "/(artisan)" ||
-    pathname === "/(artisan)/" ||
-    pathname.endsWith("/(artisan)") ||
-    pathname.endsWith("/(artisan)/index")
+    pathname === "/(artisan)/(stack)" ||
+    pathname === "/(artisan)/(stack)/" ||
+    pathname.endsWith("/(artisan)/(stack)") ||
+    pathname.endsWith("/(artisan)/(stack)/index")
   );
 }

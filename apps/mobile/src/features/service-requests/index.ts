@@ -24,7 +24,7 @@ export type { Coordinates } from "@/lib/geo";
 export {
   pickRequestPhotos,
   MAX_REQUEST_PHOTOS,
-} from "./services/request-media.service";
+} from "@/lib/media.service";
 export {
   ACTIVE_REQUEST_STATUSES,
   COMPLETED_REQUEST_STATUSES,
