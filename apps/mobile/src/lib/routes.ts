@@ -22,11 +22,11 @@ export const routes = {
     requestConfirmed: "/(customer)/(stack)/request/confirmed",
   },
   artisan: {
-    home: "/(artisan)",
-    jobs: "/(artisan)/jobs",
-    chat: "/(artisan)/chat",
-    earnings: "/(artisan)/earnings",
-    profile: "/(artisan)/profile",
+    home: "/(artisan)/(stack)",
+    jobs: "/(artisan)/(stack)/jobs",
+    chat: "/(artisan)/(stack)/chat",
+    earnings: "/(artisan)/(stack)/earnings",
+    profile: "/(artisan)/(stack)/profile",
   },
   artisanOnboarding: {
     address: "/(artisan-onboarding)/address",
@@ -58,4 +58,22 @@ export function newRequestRoute(params?: { categorySlug?: string }): Href {
 
 export function requestConfirmedRoute(requestId: string): Href {
   return { pathname: routes.customer.requestConfirmed, params: { requestId } };
+}
+
+export function artisanJobRoute(requestId: string): Href {
+  return { pathname: "/(artisan)/(stack)/job/[id]", params: { id: requestId } } as unknown as Href;
+}
+
+export function artisanJobTrackingRoute(requestId: string): Href {
+  return {
+    pathname: "/(artisan)/(stack)/job/[id]/tracking",
+    params: { id: requestId },
+  } as unknown as Href;
+}
+
+export function artisanJobCompleteRoute(requestId: string): Href {
+  return {
+    pathname: "/(artisan)/(stack)/job/[id]/complete",
+    params: { id: requestId },
+  } as unknown as Href;
 }

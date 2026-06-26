@@ -34,7 +34,7 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
     cell: ({ row }) => (
       <div className="min-w-56">
         <div className="font-medium">{row.original.customerName}</div>
-        <div className="line-clamp-1 text-sm text-muted-foreground">
+        <div className="truncate text-sm text-muted-foreground max-w-56">
           {row.original.description}
         </div>
       </div>
@@ -102,11 +102,11 @@ export const requestColumns: ColumnDef<ServiceRequestListItem>[] = [
           },
           ...(row.original.status === "matching"
             ? [
-                {
-                  label: "Match artisan",
-                  render: <Link href={`/requests/${row.original.id}/match`} />,
-                },
-              ]
+              {
+                label: "Match artisan",
+                render: <Link href={`/requests/${row.original.id}/match`} />,
+              },
+            ]
             : []),
         ]}
       />

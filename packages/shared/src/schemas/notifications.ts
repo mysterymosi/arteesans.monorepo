@@ -4,6 +4,9 @@ export const pushNotificationTypes = [
   "request_received",
   "matching_started",
   "artisan_matched",
+  "job_acceptance_required",
+  "job_status_updated",
+  "job_reassigned",
   "artisan_application",
   "verification_approved",
   "verification_rejected",
@@ -18,6 +21,19 @@ export const pushNotificationDataSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("artisan_matched"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("job_acceptance_required"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("job_status_updated"),
+    entity_id: z.string().uuid(),
+    status: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal("job_reassigned"),
     entity_id: z.string().uuid(),
   }),
   z.object({
@@ -68,8 +84,35 @@ export function buildArtisanMatchedCustomerPush(requestId: string): Omit<SendPus
 export function buildArtisanMatchedArtisanPush(requestId: string): Omit<SendPushInput, "user_ids"> {
   return {
     title: "New job match",
-    body: "You've been matched to a new service request.",
+    body: "You've been matched to a new service request. Review it when the customer confirms.",
     data: { type: "artisan_matched", entity_id: requestId },
+  };
+}
+
+export function buildJobAcceptanceRequiredPush(requestId: string): Omit<SendPushInput, "user_ids"> {
+  return {
+    title: "Job ready to accept",
+    body: "A customer confirmed your matched job. Accept or decline within 15 minutes.",
+    data: { type: "job_acceptance_required", entity_id: requestId },
+  };
+}
+
+export function buildJobStatusUpdatedPush(
+  requestId: string,
+  status: string,
+): Omit<SendPushInput, "user_ids"> {
+  return {
+    title: "Job update",
+    body: `Your job status is now ${status.replaceAll("_", " ")}.`,
+    data: { type: "job_status_updated", entity_id: requestId, status },
+  };
+}
+
+export function buildJobReassignedPush(requestId: string): Omit<SendPushInput, "user_ids"> {
+  return {
+    title: "Job needs rematch",
+    body: "A service request was returned to matching and needs a new artisan.",
+    data: { type: "job_reassigned", entity_id: requestId },
   };
 }
 

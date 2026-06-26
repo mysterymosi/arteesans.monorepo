@@ -1,7 +1,7 @@
 import type { UrgencyLevel } from "@arteesans/shared";
 import { supabase } from "@/lib/supabase";
 import { notifyRequestCreated } from "@/features/notifications";
-import { uploadRequestPhotos } from "@/features/service-requests/services/request-media.service";
+import { uploadRequestPhotos } from "@/lib/media.service";
 
 export type CreateServiceRequestInput = {
   categoryId: string;

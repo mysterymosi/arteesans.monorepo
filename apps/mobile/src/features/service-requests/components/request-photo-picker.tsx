@@ -5,7 +5,7 @@ import { icons } from "@/constants/icons";
 import {
   MAX_REQUEST_PHOTOS,
   pickRequestPhotos,
-} from "@/features/service-requests/services/request-media.service";
+} from "@/lib/media.service";
 
 type RequestPhotoPickerProps = {
   photoUris: string[];

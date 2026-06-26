@@ -64,7 +64,8 @@ export type Database = {
       admin_actions: {
         Row: {
           action_type: string
-          admin_id: string
+          actor_id: string | null
+          admin_id: string | null
           created_at: string
           entity_id: string
           entity_type: string
@@ -73,7 +74,8 @@ export type Database = {
         }
         Insert: {
           action_type: string
-          admin_id: string
+          actor_id?: string | null
+          admin_id?: string | null
           created_at?: string
           entity_id: string
           entity_type: string
@@ -82,7 +84,8 @@ export type Database = {
         }
         Update: {
           action_type?: string
-          admin_id?: string
+          actor_id?: string | null
+          admin_id?: string | null
           created_at?: string
           entity_id?: string
           entity_type?: string
@@ -295,10 +298,12 @@ export type Database = {
       }
       service_requests: {
         Row: {
+          accept_deadline_at: string | null
           address: string
           assigned_artisan_id: string | null
           budget: number | null
           category_id: string
+          completion_media_paths: string[]
           created_at: string
           customer_id: string
           description: string
@@ -306,15 +311,18 @@ export type Database = {
           location: unknown
           media_paths: string[]
           preferred_time: string | null
+          reject_reason: string | null
           status: Database["public"]["Enums"]["request_status"]
           updated_at: string
           urgency: Database["public"]["Enums"]["urgency_level"]
         }
         Insert: {
+          accept_deadline_at?: string | null
           address: string
           assigned_artisan_id?: string | null
           budget?: number | null
           category_id: string
+          completion_media_paths?: string[]
           created_at?: string
           customer_id: string
           description: string
@@ -322,15 +330,18 @@ export type Database = {
           location?: unknown
           media_paths?: string[]
           preferred_time?: string | null
+          reject_reason?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
           urgency?: Database["public"]["Enums"]["urgency_level"]
         }
         Update: {
+          accept_deadline_at?: string | null
           address?: string
           assigned_artisan_id?: string | null
           budget?: number | null
           category_id?: string
+          completion_media_paths?: string[]
           created_at?: string
           customer_id?: string
           description?: string
@@ -338,6 +349,7 @@ export type Database = {
           location?: unknown
           media_paths?: string[]
           preferred_time?: string | null
+          reject_reason?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
           urgency?: Database["public"]["Enums"]["urgency_level"]

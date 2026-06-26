@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import type { PushNotificationData } from "@arteesans/shared";
-import { routes } from "@/lib/routes";
+import { routes, artisanJobRoute } from "@/lib/routes";
 import { useAuthProfile, useAuthSession } from "@/providers/auth-provider";
 import { syncPushTokenForUser } from "@/features/notifications";
 
@@ -32,11 +32,27 @@ function routeFromPushData(
       router.push(routes.customer.bookings);
       return;
     case "artisan_matched":
+    case "job_acceptance_required":
       if (role === "artisan") {
+        if (data.entity_id) {
+          router.push(artisanJobRoute(data.entity_id));
+          return;
+        }
         router.push(routes.artisan.home);
         return;
       }
       router.push(routes.customer.bookings);
+      return;
+    case "job_status_updated":
+      if (role === "artisan") {
+        if (data.entity_id) {
+          router.push(artisanJobRoute(data.entity_id));
+          return;
+        }
+      }
+      router.push(routes.customer.bookings);
+      return;
+    case "job_reassigned":
       return;
     case "verification_approved":
     case "verification_rejected":

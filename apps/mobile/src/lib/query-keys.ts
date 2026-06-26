@@ -27,4 +27,13 @@ export const queryKeys = {
     detail: (userId: string | undefined) =>
       [...queryKeys.artisanProfile.all, userId] as const,
   },
+  artisanJobs: {
+    all: ["artisan-jobs"] as const,
+    lists: () => [...queryKeys.artisanJobs.all, "list"] as const,
+    list: (userId: string | undefined) =>
+      [...queryKeys.artisanJobs.lists(), userId] as const,
+    details: () => [...queryKeys.artisanJobs.all, "detail"] as const,
+    detail: (requestId: string | undefined) =>
+      [...queryKeys.artisanJobs.details(), requestId] as const,
+  },
 } as const;
