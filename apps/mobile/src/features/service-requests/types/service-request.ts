@@ -26,8 +26,29 @@ export const ACTIVE_REQUEST_STATUSES: RequestStatus[] = [
 
 export const COMPLETED_REQUEST_STATUSES: RequestStatus[] = ["completed", "cancelled", "disputed"];
 
-export function isActiveRequestStatus(status: RequestStatus): boolean {
+export function isAwaitingCustomerConfirmation(
+  request: Pick<CustomerServiceRequest, "status" | "customer_confirmed_at">,
+): boolean {
+  return request.status === "completed" && !request.customer_confirmed_at;
+}
+
+export function isActiveRequestStatus(
+  status: RequestStatus,
+  customerConfirmedAt?: string | null,
+): boolean {
+  if (status === "completed" && !customerConfirmedAt) {
+    return true;
+  }
   return ACTIVE_REQUEST_STATUSES.includes(status);
+}
+
+export function isFullyCompletedRequest(
+  request: Pick<CustomerServiceRequest, "status" | "customer_confirmed_at">,
+): boolean {
+  if (request.status === "completed") {
+    return Boolean(request.customer_confirmed_at);
+  }
+  return COMPLETED_REQUEST_STATUSES.includes(request.status);
 }
 
 export function filterRequestsByTab(
@@ -35,10 +56,12 @@ export function filterRequestsByTab(
   tab: "all" | "active" | "completed",
 ): CustomerServiceRequest[] {
   if (tab === "active") {
-    return requests.filter((request) => isActiveRequestStatus(request.status));
+    return requests.filter((request) =>
+      isActiveRequestStatus(request.status, request.customer_confirmed_at),
+    );
   }
   if (tab === "completed") {
-    return requests.filter((request) => COMPLETED_REQUEST_STATUSES.includes(request.status));
+    return requests.filter((request) => isFullyCompletedRequest(request));
   }
   return requests;
 }

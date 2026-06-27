@@ -77,3 +77,24 @@ export function artisanJobCompleteRoute(requestId: string): Href {
     params: { id: requestId },
   } as unknown as Href;
 }
+
+export function customerBookingRoute(requestId: string): Href {
+  return {
+    pathname: "/(customer)/(stack)/booking/[id]",
+    params: { id: requestId },
+  } as unknown as Href;
+}
+
+export function customerBookingTrackingRoute(requestId: string): Href {
+  return {
+    pathname: "/(customer)/(stack)/booking/[id]/track",
+    params: { id: requestId },
+  } as unknown as Href;
+}
+
+export function customerBookingArtisanRoute(requestId: string): Href {
+  return {
+    pathname: "/(customer)/(stack)/booking/[id]/artisan",
+    params: { id: requestId },
+  } as unknown as Href;
+}

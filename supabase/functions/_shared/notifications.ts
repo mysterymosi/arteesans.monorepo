@@ -14,6 +14,14 @@ export function buildArtisanApplicationPush(profileId: string) {
   };
 }
 
+export function buildJobAcceptanceRequiredPush(requestId: string) {
+  return {
+    title: "Job ready to accept",
+    body: "A customer confirmed your matched job. Accept or decline within 15 minutes.",
+    data: { type: "job_acceptance_required", entity_id: requestId },
+  };
+}
+
 export function buildJobStatusUpdatedPush(
   requestId: string,
   status: string,

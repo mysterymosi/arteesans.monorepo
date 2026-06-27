@@ -2,11 +2,16 @@ export {
   useCreateServiceRequestMutation,
   type CreateServiceRequestInput,
 } from "./hooks/use-create-service-request";
-export { useServiceCategories } from "./hooks/use-service-categories";
 export {
   useCustomerRequest,
   useCustomerRequests,
 } from "./hooks/use-service-requests";
+export {
+  useConfirmBooking,
+  useConfirmJobCompletion,
+} from "./hooks/use-booking-actions";
+export { useCustomerRequestsListRealtime } from "./hooks/use-customer-request-realtime";
+export { useServiceCategories } from "./hooks/use-service-categories";
 export {
   createRequestFormSchema,
   parseBudget,
@@ -31,6 +36,8 @@ export {
   filterRequestsByTab,
   getUrgencyTone,
   isActiveRequestStatus,
+  isAwaitingCustomerConfirmation,
+  isFullyCompletedRequest,
   type AssignedArtisan,
   type CustomerServiceRequest,
   type ServiceCategory,
@@ -40,4 +47,5 @@ export { CategoryIcon } from "./components/category-icon";
 export { CategorySelectGrid } from "./components/category-select-grid";
 export { RequestPhotoPicker } from "./components/request-photo-picker";
 export { RequestCard } from "./components/request-card";
+export { CustomerJobStatusStepper } from "./components/customer-job-status-stepper";
 export { UrgencySelector } from "./components/urgency-selector";

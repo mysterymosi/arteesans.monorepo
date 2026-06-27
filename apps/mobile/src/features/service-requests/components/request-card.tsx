@@ -3,6 +3,7 @@ import { Text, StatusChip, Avatar } from "@/components/ui";
 import { CategoryIcon } from "@/features/service-requests/components/category-icon";
 import { formatNaira, formatPersonName, formatRequestDate } from "@/lib/format";
 import type { CustomerServiceRequest } from "@/features/service-requests/types/service-request";
+import { isActiveRequestStatus } from "@/features/service-requests/types/service-request";
 import { cn } from "@/lib/cn";
 
 type RequestCardProps = {
@@ -27,7 +28,7 @@ export function RequestCard({ request, variant = "booking", onPress }: RequestCa
     : null;
   const isFeatured = variant === "featured";
   const showArtisan = Boolean(artisanName);
-  const showTrack = isActiveStatus(request.status);
+  const showTrack = isActiveRequestStatus(request.status, request.customer_confirmed_at);
 
   const content = (
     <View
@@ -131,6 +132,3 @@ export function RequestCard({ request, variant = "booking", onPress }: RequestCa
   );
 }
 
-function isActiveStatus(status: CustomerServiceRequest["status"]): boolean {
-  return ["matched", "confirmed", "accepted", "on_the_way", "arrived", "in_progress"].includes(status);
-}
