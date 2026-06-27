@@ -11,9 +11,16 @@ const CUSTOMER_NOTIFY_STATUSES = new Set([
   "completed",
 ]);
 
+const NO_OP_RESULT = { ok: true, sent: 0, removed: 0, failed: 0, failures: [] };
+
 type NotifyJobStatusBody = {
   request_id?: string;
+  status?: string;
 };
+
+function isUniqueViolation(error: { code?: string }): boolean {
+  return error.code === "23505";
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -57,8 +64,15 @@ Deno.serve(async (req) => {
   }
 
   const requestId = payload.request_id?.trim();
+  const status = payload.status?.trim();
   if (!requestId) {
     return jsonResponse({ error: "request_id is required" }, 400);
+  }
+  if (!status) {
+    return jsonResponse({ error: "status is required" }, 400);
+  }
+  if (!CUSTOMER_NOTIFY_STATUSES.has(status)) {
+    return jsonResponse({ error: "status is not notifiable" }, 400);
   }
 
   const { data: request, error: requestError } = await authClient
@@ -76,13 +90,32 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Job not found" }, 404);
   }
 
-  if (!CUSTOMER_NOTIFY_STATUSES.has(request.status)) {
-    return jsonResponse({ ok: true, sent: 0, removed: 0, failed: 0, failures: [] });
+  if (request.status !== status) {
+    return jsonResponse(NO_OP_RESULT);
   }
 
   try {
     const service = createServiceSupabase();
-    const push = buildJobStatusUpdatedPush(requestId, request.status);
+
+    const { data: claimed, error: claimError } = await service
+      .from("job_status_notifications")
+      .insert({ request_id: requestId, status })
+      .select("request_id")
+      .maybeSingle();
+
+    if (claimError) {
+      if (isUniqueViolation(claimError)) {
+        return jsonResponse(NO_OP_RESULT);
+      }
+      console.error("notify-job-status-updated claim failed:", claimError.message);
+      return jsonResponse({ error: "Failed to record notification" }, 500);
+    }
+
+    if (!claimed) {
+      return jsonResponse(NO_OP_RESULT);
+    }
+
+    const push = buildJobStatusUpdatedPush(requestId, status);
     const result = await sendPushToUsers(service, {
       user_ids: [request.customer_id],
       ...push,

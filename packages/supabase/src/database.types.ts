@@ -222,6 +222,32 @@ export type Database = {
           },
         ]
       }
+      job_status_notifications: {
+        Row: {
+          request_id: string
+          sent_at: string
+          status: Database["public"]["Enums"]["request_status"]
+        }
+        Insert: {
+          request_id: string
+          sent_at?: string
+          status: Database["public"]["Enums"]["request_status"]
+        }
+        Update: {
+          request_id?: string
+          sent_at?: string
+          status?: Database["public"]["Enums"]["request_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_status_notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_tokens: {
         Row: {
           created_at: string

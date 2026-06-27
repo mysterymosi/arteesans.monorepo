@@ -37,8 +37,9 @@ export async function acceptJob(requestId: string): Promise<RequestStatus> {
 
   if (error) throw error;
 
-  void notifyJobStatusUpdated(requestId);
-  return data as RequestStatus;
+  const status = data as RequestStatus;
+  void notifyJobStatusUpdated(requestId, status);
+  return status;
 }
 
 export async function rejectJob(requestId: string, reason?: string): Promise<RequestStatus> {
@@ -62,8 +63,9 @@ export async function updateJobStatus(
 
   if (error) throw error;
 
-  void notifyJobStatusUpdated(requestId);
-  return data as RequestStatus;
+  const status = data as RequestStatus;
+  void notifyJobStatusUpdated(requestId, status);
+  return status;
 }
 
 export async function attachCompletionMedia(

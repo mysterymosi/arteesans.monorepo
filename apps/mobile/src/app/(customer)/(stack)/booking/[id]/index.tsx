@@ -13,6 +13,7 @@ import { formatNaira, formatPersonName } from "@/lib/format";
 import {
   customerBookingArtisanRoute,
   customerBookingTrackingRoute,
+  routes,
 } from "@/lib/routes";
 
 export default function CustomerBookingDetailScreen() {
@@ -40,7 +41,13 @@ export default function CustomerBookingDetailScreen() {
           <Text className="text-center text-ink-secondary">
             {isError ? "Could not load this booking." : "This booking is no longer available."}
           </Text>
-          <Button title="Go back" variant="outline" onPress={() => router.back()} />
+          <Button
+            title="Go back"
+            variant="outline"
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace(routes.customer.bookings)
+            }
+          />
         </View>
       </View>
     );

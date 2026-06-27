@@ -8,7 +8,7 @@ import {
   useCustomerRequest,
 } from "@/features/service-requests";
 import { formatNaira } from "@/lib/format";
-import { customerBookingRoute } from "@/lib/routes";
+import { customerBookingRoute, routes } from "@/lib/routes";
 
 export default function CustomerBookingTrackScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -34,7 +34,13 @@ export default function CustomerBookingTrackScreen() {
           <Text className="text-center text-ink-secondary">
             {isError ? "Could not load this job." : "This job is no longer available."}
           </Text>
-          <Button title="Go back" variant="outline" onPress={() => router.back()} />
+          <Button
+            title="Go back"
+            variant="outline"
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace(routes.customer.bookings)
+            }
+          />
         </View>
       </View>
     );
@@ -108,7 +114,11 @@ export default function CustomerBookingTrackScreen() {
         <Button
           title="Booking details"
           variant="outline"
-          onPress={() => router.push(customerBookingRoute(request.id))}
+          onPress={() =>
+            router.canGoBack()
+              ? router.back()
+              : router.replace(customerBookingRoute(request.id))
+          }
         />
       </ScrollView>
     </View>
