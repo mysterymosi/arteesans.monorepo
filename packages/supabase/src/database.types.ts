@@ -305,6 +305,7 @@ export type Database = {
           category_id: string
           completion_media_paths: string[]
           created_at: string
+          customer_confirmed_at: string | null
           customer_id: string
           description: string
           id: string
@@ -324,6 +325,7 @@ export type Database = {
           category_id: string
           completion_media_paths?: string[]
           created_at?: string
+          customer_confirmed_at?: string | null
           customer_id: string
           description: string
           id?: string
@@ -343,6 +345,7 @@ export type Database = {
           category_id?: string
           completion_media_paths?: string[]
           created_at?: string
+          customer_confirmed_at?: string | null
           customer_id?: string
           description?: string
           id?: string
@@ -489,6 +492,14 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_booking: {
+        Args: { p_request_id: string }
+        Returns: Database["public"]["Enums"]["request_status"]
+      }
+      confirm_job_completion: {
+        Args: { p_request_id: string }
+        Returns: string
+      }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]

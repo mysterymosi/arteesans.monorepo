@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { BackButton } from "@/features/customer";
 import {
   filterRequestsByTab,
@@ -9,6 +10,7 @@ import {
 } from "@/features/service-requests";
 import { Text } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { customerBookingRoute } from "@/lib/routes";
 import { colors } from "@/theme";
 
 type BookingsTab = "all" | "active" | "completed";
@@ -65,7 +67,12 @@ export default function BookingsScreen() {
         <ScrollView contentContainerClassName="gap-4 px-5 py-5" showsVerticalScrollIndicator={false}>
           {filteredRequests.length > 0 ? (
             filteredRequests.map((request) => (
-              <RequestCard key={request.id} request={request} variant="booking" />
+              <RequestCard
+                key={request.id}
+                request={request}
+                variant="booking"
+                onPress={() => router.push(customerBookingRoute(request.id))}
+              />
             ))
           ) : (
             <View className="mt-12 rounded-2xl border border-line bg-surface px-4 py-10">

@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import type { PushNotificationData } from "@arteesans/shared";
-import { routes, artisanJobRoute } from "@/lib/routes";
+import { routes, artisanJobRoute, customerBookingRoute, customerBookingTrackingRoute } from "@/lib/routes";
 import { useAuthProfile, useAuthSession } from "@/providers/auth-provider";
 import { syncPushTokenForUser } from "@/features/notifications";
 
@@ -41,6 +41,10 @@ function routeFromPushData(
         router.push(routes.artisan.home);
         return;
       }
+      if (data.entity_id) {
+        router.push(customerBookingRoute(data.entity_id));
+        return;
+      }
       router.push(routes.customer.bookings);
       return;
     case "job_status_updated":
@@ -50,6 +54,10 @@ function routeFromPushData(
           return;
         }
         router.push(routes.artisan.jobs);
+        return;
+      }
+      if (data.entity_id) {
+        router.push(customerBookingTrackingRoute(data.entity_id));
         return;
       }
       router.push(routes.customer.bookings);

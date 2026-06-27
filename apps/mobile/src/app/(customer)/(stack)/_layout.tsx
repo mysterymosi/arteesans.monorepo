@@ -1,6 +1,9 @@
 import { Stack } from "expo-router";
+import { useCustomerRequestsListRealtime } from "@/features/service-requests";
 
 export default function CustomerStackLayout() {
+  useCustomerRequestsListRealtime();
+
   return (
     <Stack
       screenOptions={{

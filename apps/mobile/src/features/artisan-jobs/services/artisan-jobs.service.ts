@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { notifyJobStatusUpdated } from "@/features/notifications/services/booking-notifications.service";
 import type { RequestStatus } from "@arteesans/shared";
 import type { ArtisanJob } from "@/features/artisan-jobs/types/artisan-job";
 
@@ -35,6 +36,8 @@ export async function acceptJob(requestId: string): Promise<RequestStatus> {
   } as never);
 
   if (error) throw error;
+
+  void notifyJobStatusUpdated(requestId);
   return data as RequestStatus;
 }
 
@@ -58,6 +61,8 @@ export async function updateJobStatus(
   } as never);
 
   if (error) throw error;
+
+  void notifyJobStatusUpdated(requestId);
   return data as RequestStatus;
 }
 

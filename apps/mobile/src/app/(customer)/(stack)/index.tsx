@@ -22,7 +22,7 @@ import {
   useCustomerRequests,
   useServiceCategories,
 } from "@/features/service-requests";
-import { newRequestRoute, routes } from "@/lib/routes";
+import { customerBookingRoute, newRequestRoute, routes } from "@/lib/routes";
 import { useAuthProfile } from "@/providers/auth-provider";
 import { colors } from "@/theme";
 import { Image } from "expo-image";
@@ -41,7 +41,10 @@ export default function CustomerHome() {
     ? "..."
     : formatAddressLocationLabel(defaultAddress) ?? "Add your address";
   const activeRequests = useMemo(
-    () => requests.filter((request) => isActiveRequestStatus(request.status)),
+    () =>
+      requests.filter((request) =>
+        isActiveRequestStatus(request.status, request.customer_confirmed_at),
+      ),
     [requests],
   );
   const recentRequests = useMemo(() => requests.slice(0, 5), [requests]);
@@ -152,7 +155,7 @@ export default function CustomerHome() {
                       <RequestCard
                         request={item}
                         variant={index === 0 ? "featured" : "booking"}
-                        onPress={() => router.push(routes.customer.bookings)}
+                        onPress={() => router.push(customerBookingRoute(item.id))}
                       />
                     </View>
                   )}
@@ -174,7 +177,7 @@ export default function CustomerHome() {
                       key={request.id}
                       request={request}
                       variant="compact"
-                      onPress={() => router.push(routes.customer.bookings)}
+                      onPress={() => router.push(customerBookingRoute(request.id))}
                     />
                   ))}
                 </View>
