@@ -97,21 +97,19 @@ Deno.serve(async (req) => {
   try {
     const service = createServiceSupabase();
 
-    const { data: claimed, error: claimError } = await service
+    const { data: existing, error: existingError } = await service
       .from("job_status_notifications")
-      .insert({ request_id: requestId, status })
       .select("request_id")
+      .eq("request_id", requestId)
+      .eq("status", status)
       .maybeSingle();
 
-    if (claimError) {
-      if (isUniqueViolation(claimError)) {
-        return jsonResponse(NO_OP_RESULT);
-      }
-      console.error("notify-job-status-updated claim failed:", claimError.message);
-      return jsonResponse({ error: "Failed to record notification" }, 500);
+    if (existingError) {
+      console.error("notify-job-status-updated lookup failed:", existingError.message);
+      return jsonResponse({ error: "Failed to verify notification" }, 500);
     }
 
-    if (!claimed) {
+    if (existing) {
       return jsonResponse(NO_OP_RESULT);
     }
 
@@ -120,6 +118,18 @@ Deno.serve(async (req) => {
       user_ids: [request.customer_id],
       ...push,
     });
+
+    const { error: recordError } = await service
+      .from("job_status_notifications")
+      .insert({ request_id: requestId, status });
+
+    if (recordError) {
+      if (isUniqueViolation(recordError)) {
+        return jsonResponse({ ok: true, ...result });
+      }
+      console.error("notify-job-status-updated record failed:", recordError.message);
+      return jsonResponse({ error: "Failed to record notification" }, 500);
+    }
 
     return jsonResponse({ ok: true, ...result });
   } catch (error) {
