@@ -87,20 +87,6 @@ revoke all on function private.edge_function_url(text) from public;
 revoke all on function private.service_role_key() from public;
 revoke all on function private.dispatch_edge_function(text, jsonb) from public;
 
--- Local Supabase default. Override on hosted projects (see docs/setup.md).
-do $config$
-begin
-  execute format(
-    'alter database %I set app.settings.supabase_url = %L',
-    current_database(),
-    'http://kong:8000'
-  );
-exception
-  when insufficient_privilege then
-    raise log 'Could not set app.settings.supabase_url on database %', current_database();
-end
-$config$;
-
 create or replace function public.express_interest(p_request_id uuid)
 returns public.request_interest_status
 language plpgsql
@@ -186,6 +172,18 @@ begin
     raise exception 'Selected artisan has not expressed interest';
   end if;
 
+  update public.request_artisan_interests
+  set
+    status = 'selected',
+    updated_at = now()
+  where request_id = p_request_id
+    and artisan_id = p_artisan_id
+    and status = 'pending';
+
+  if not found then
+    raise exception 'Selected artisan has not expressed interest';
+  end if;
+
   update public.service_requests
   set
     assigned_artisan_id = p_artisan_id,
@@ -194,14 +192,6 @@ begin
     reject_reason = null,
     updated_at = now()
   where id = p_request_id;
-
-  update public.request_artisan_interests
-  set
-    status = 'selected',
-    updated_at = now()
-  where request_id = p_request_id
-    and artisan_id = p_artisan_id
-    and status = 'pending';
 
   update public.request_artisan_interests
   set

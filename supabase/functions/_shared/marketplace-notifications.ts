@@ -11,6 +11,13 @@ function isUniqueViolation(error: { code?: string }): boolean {
   return error.code === "23505";
 }
 
+function isPushDispatchSuccessful(result: {
+  sent: number;
+  failed: number;
+}): boolean {
+  return result.sent > 0;
+}
+
 export async function dispatchRequestInterestNotification(
   service: SupabaseClient,
   requestId: string,
@@ -67,12 +74,14 @@ export async function dispatchRequestInterestNotification(
     ...push,
   });
 
-  const { error: recordError } = await service
-    .from("request_interest_notifications")
-    .insert({ request_id: requestId, artisan_id: artisanId });
+  if (isPushDispatchSuccessful(result)) {
+    const { error: recordError } = await service
+      .from("request_interest_notifications")
+      .insert({ request_id: requestId, artisan_id: artisanId });
 
-  if (recordError && !isUniqueViolation(recordError)) {
-    throw new Error(recordError.message);
+    if (recordError && !isUniqueViolation(recordError)) {
+      throw new Error(recordError.message);
+    }
   }
 
   return { ok: true, ...result };
@@ -121,12 +130,14 @@ export async function dispatchArtisanSelectedNotification(
     ...push,
   });
 
-  const { error: recordError } = await service
-    .from("artisan_selected_notifications")
-    .insert({ request_id: requestId, artisan_id: artisanId });
+  if (isPushDispatchSuccessful(result)) {
+    const { error: recordError } = await service
+      .from("artisan_selected_notifications")
+      .insert({ request_id: requestId, artisan_id: artisanId });
 
-  if (recordError && !isUniqueViolation(recordError)) {
-    throw new Error(recordError.message);
+    if (recordError && !isUniqueViolation(recordError)) {
+      throw new Error(recordError.message);
+    }
   }
 
   return { ok: true, ...result };
