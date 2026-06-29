@@ -1,10 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type { OpenRequest, RequestInterest } from "@/features/open-requests/types/open-request";
-import {
-  notifyArtisanSelected,
-  notifyJobStatusUpdated,
-  notifyRequestInterest,
-} from "@/features/notifications/services/booking-notifications.service";
+import { notifyJobStatusUpdated } from "@/features/notifications/services/booking-notifications.service";
 import type { RequestStatus } from "@arteesans/shared";
 
 export async function fetchOpenRequests(): Promise<OpenRequest[]> {
@@ -22,7 +18,6 @@ export async function expressInterest(requestId: string): Promise<void> {
   } as never);
 
   if (error) throw error;
-  void notifyRequestInterest(requestId);
 }
 
 export async function withdrawInterest(requestId: string): Promise<void> {
@@ -52,7 +47,6 @@ export async function selectArtisan(
   } as never);
 
   if (error) throw error;
-  void notifyArtisanSelected(requestId);
   return data as RequestStatus;
 }
 

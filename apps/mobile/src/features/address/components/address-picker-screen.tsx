@@ -90,9 +90,10 @@ export function AddressPickerScreen({
     setError(null);
 
     clearDebounceTimer();
+    searchGenerationRef.current += 1;
+    const generation = searchGenerationRef.current;
 
     if (value.trim().length < 3) {
-      searchGenerationRef.current += 1;
       setPredictions([]);
       setIsSearching(false);
       return;
@@ -100,12 +101,20 @@ export function AddressPickerScreen({
 
     setIsSearching(true);
     debounceRef.current = setTimeout(() => {
-      const generation = ++searchGenerationRef.current;
       void (async () => {
-        const results = await fetchPlacePredictions(value);
-        if (generation !== searchGenerationRef.current) return;
-        setPredictions(results);
-        setIsSearching(false);
+        try {
+          const results = await fetchPlacePredictions(value);
+          if (generation !== searchGenerationRef.current) return;
+          setPredictions(results);
+        } catch {
+          if (generation !== searchGenerationRef.current) return;
+          setPredictions([]);
+          setError("Could not search for addresses. Please try again.");
+        } finally {
+          if (generation === searchGenerationRef.current) {
+            setIsSearching(false);
+          }
+        }
       })();
     }, 300);
   }
@@ -117,19 +126,23 @@ export function AddressPickerScreen({
     setPredictions([]);
     setQuery(prediction.description);
 
-    const details = await fetchPlaceDetails(prediction.placeId);
-    const resolved = details
-      ? await resolveAddress(details.address, details.coords)
-      : await resolveAddress(prediction.description);
+    try {
+      const details = await fetchPlaceDetails(prediction.placeId);
+      const resolved = details
+        ? await resolveAddress(details.address, details.coords)
+        : await resolveAddress(prediction.description);
 
-    if (!resolved) {
+      if (!resolved) {
+        setError("Could not load that address. Try another result.");
+      } else {
+        setSelectedAddress(resolved);
+        setQuery(resolved.displayAddress);
+      }
+    } catch {
       setError("Could not load that address. Try another result.");
-    } else {
-      setSelectedAddress(resolved);
-      setQuery(resolved.displayAddress);
+    } finally {
+      setIsResolving(false);
     }
-
-    setIsResolving(false);
   }
 
   async function handleUseCurrentLocation() {
@@ -138,26 +151,40 @@ export function AddressPickerScreen({
     setError(null);
     setPredictions([]);
 
-    const { coords, error: locationError } = await getCurrentCoordinates();
-    const address = await reverseGeocodeAddress(coords);
-    const resolved = (address ? await resolveAddress(address, coords) : null) ?? {
-      displayAddress: "Current location",
-      line1: "Current location",
-      cityLga: null,
-      state: null,
-      coords,
-    };
+    try {
+      const { coords, error: locationError } = await getCurrentCoordinates();
+      const address = await reverseGeocodeAddress(coords);
+      const resolved = (address ? await resolveAddress(address, coords) : null) ?? {
+        displayAddress: "Current location",
+        line1: "Current location",
+        cityLga: null,
+        state: null,
+        coords,
+      };
 
-    setSelectedAddress(resolved);
-    setQuery(resolved.displayAddress);
-    setError(locationError ?? null);
-    setIsLocating(false);
+      setSelectedAddress(resolved);
+      setQuery(resolved.displayAddress);
+      setError(locationError ?? null);
+    } catch {
+      setError("Could not get your current location. Please try again.");
+    } finally {
+      setIsLocating(false);
+    }
   }
 
   async function handleConfirmAddress() {
     setError(null);
 
-    const resolved = selectedAddress ?? (await resolveAddress(query));
+    let resolved = selectedAddress;
+    if (!resolved) {
+      try {
+        resolved = await resolveAddress(query);
+      } catch {
+        setError("Could not verify that address. Please try again.");
+        return;
+      }
+    }
+
     if (!resolved) {
       setError("Enter an address or use your current location.");
       return;

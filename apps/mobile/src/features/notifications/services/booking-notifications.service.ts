@@ -23,23 +23,3 @@ export async function notifyJobStatusUpdated(
     console.warn("notify-job-status-updated failed:", error.message);
   }
 }
-
-export async function notifyRequestInterest(requestId: string): Promise<void> {
-  const { error } = await supabase.functions.invoke("notify-request-interest", {
-    body: { request_id: requestId },
-  });
-
-  if (error) {
-    console.warn("notify-request-interest failed:", error.message);
-  }
-}
-
-export async function notifyArtisanSelected(requestId: string): Promise<void> {
-  const { error } = await supabase.functions.invoke("notify-artisan-selected", {
-    body: { request_id: requestId },
-  });
-
-  if (error) {
-    console.warn("notify-artisan-selected failed:", error.message);
-  }
-}

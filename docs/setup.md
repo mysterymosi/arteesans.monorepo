@@ -60,9 +60,27 @@ npx eas credentials
 supabase functions deploy send-push
 supabase functions deploy notify-request-created
 supabase functions deploy notify-artisan-application
+supabase functions deploy notify-request-interest
+supabase functions deploy notify-artisan-selected
 ```
 
-`send-push` is service-role only. Mobile apps call the authenticated `notify-*` functions after request creation or artisan onboarding submit.
+`send-push`, `notify-request-interest`, and `notify-artisan-selected` are service-role only.
+Marketplace interest/selection pushes are dispatched from Postgres after `express_interest` /
+`select_artisan` succeed. Mobile apps call the other authenticated `notify-*` functions after
+request creation or artisan onboarding submit.
+
+### Marketplace notification dispatch (hosted)
+
+After applying migrations, configure the database so RPCs can invoke Edge Functions via `pg_net`:
+
+```sql
+alter database postgres set app.settings.supabase_url = 'https://cpzbnkyqigqcssqjzhoh.supabase.co';
+alter database postgres set app.settings.service_role_key = '<service_role_key>';
+```
+
+Use the service role key from Project Settings → API keys. Local Supabase defaults to
+`http://kong:8000`; set `app.settings.service_role_key` locally if dispatch logs show it is missing
+(`supabase status -o env` prints `SERVICE_ROLE_KEY`).
 
 ### Test on device
 

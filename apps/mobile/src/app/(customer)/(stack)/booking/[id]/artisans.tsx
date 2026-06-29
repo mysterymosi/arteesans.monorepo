@@ -3,7 +3,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { Button, ScreenHeader, Text } from "@/components/ui";
 import { InterestArtisanRow, useRequestInterests } from "@/features/open-requests";
 import { useCustomerRequest } from "@/features/service-requests";
-import { customerBookingArtisanRoute } from "@/lib/routes";
+import { customerBookingArtisanRoute, customerBookingRoute } from "@/lib/routes";
 
 export default function CustomerBookingArtisansScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,7 +32,7 @@ export default function CustomerBookingArtisansScreen() {
           <Button
             title="Back to booking"
             variant="outline"
-            onPress={() => router.back()}
+            onPress={() => router.canGoBack() ? router.back() : router.replace(customerBookingRoute(id))}
           />
         </View>
       </View>

@@ -58,8 +58,21 @@ export function ArtisanHomeDashboard({
   const isApproved = verificationStatus === "approved";
   const greeting = firstName ? `Hello ${firstName},` : "Hello,";
   const { data: jobs = [] } = useArtisanJobs();
-  const { data: openRequests = [] } = useOpenRequests();
+  const {
+    data: openRequests,
+    isLoading: isOpenRequestsLoading,
+    isError: isOpenRequestsError,
+  } = useOpenRequests();
   const rejectJob = useRejectJob();
+
+  const openRequestCount = openRequests?.length ?? 0;
+  const openRequestsSubtitle = isOpenRequestsLoading
+    ? "Checking for nearby requests..."
+    : isOpenRequestsError
+      ? "Could not load open requests"
+      : openRequestCount > 0
+        ? `${openRequestCount} matching request${openRequestCount === 1 ? "" : "s"} available`
+        : "Browse new customer requests in your skill area";
 
   const incomingJob = jobs.find(isIncomingAcceptanceJob);
   const recentJobs = jobs
@@ -174,11 +187,7 @@ export function ArtisanHomeDashboard({
             className="rounded-2xl border border-primary/20 bg-primary-subtle px-4 py-4"
           >
             <Text className="font-medium text-base text-primary">Open requests near you</Text>
-            <Text className="mt-1 text-sm text-ink-secondary">
-              {openRequests.length > 0
-                ? `${openRequests.length} matching request${openRequests.length === 1 ? "" : "s"} available`
-                : "Browse new customer requests in your skill area"}
-            </Text>
+            <Text className="mt-1 text-sm text-ink-secondary">{openRequestsSubtitle}</Text>
           </Pressable>
 
           {incomingJob ? (

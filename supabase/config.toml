@@ -393,10 +393,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.notify-request-interest]
-verify_jwt = true
+verify_jwt = false
 
 [functions.notify-artisan-selected]
-verify_jwt = true
+verify_jwt = false
 
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
