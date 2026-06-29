@@ -23,14 +23,15 @@ export function AssignSuggestionAction({
     <ConfirmDialog
       open={isOpen}
       onOpenChange={setIsOpen}
-      title="Assign artisan?"
+      title="Admin override — assign artisan?"
       description={
         <>
-          Assign <span className="font-medium">{suggestion.artisanName}</span> to
-          this request. The request will move from matching to matched.
+          Manually assign <span className="font-medium">{suggestion.artisanName}</span> to
+          this request. The request will move from matching to matched and bypass the
+          marketplace flow.
         </>
       }
-      confirmLabel="Assign artisan"
+      confirmLabel="Assign (override)"
       isPending={assignMutation.isPending}
       onConfirm={() => {
         assignMutation.mutate(

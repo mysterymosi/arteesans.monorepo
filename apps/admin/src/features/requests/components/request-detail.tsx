@@ -103,9 +103,10 @@ export function RequestDetailView({ request }: { request: ServiceRequestDetail }
               <Button
                 nativeButton={false}
                 render={<Link href={`/requests/${request.id}/match`} />}
+                variant="outline"
                 className="px-9"
               >
-                Match Artisan
+                Admin override
               </Button>
             ) : null}
           </div>

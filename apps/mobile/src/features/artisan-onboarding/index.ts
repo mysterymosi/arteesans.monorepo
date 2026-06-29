@@ -14,6 +14,7 @@ export {
 } from "./hooks/use-submit-artisan-onboarding";
 export {
   formatArtisanAddressLabel,
+  formatArtisanLocationLabel,
   isArtisanOnboardingComplete,
 } from "./services/artisan-profile.service";
 export { submitArtisanOnboarding } from "./services/onboarding.service";

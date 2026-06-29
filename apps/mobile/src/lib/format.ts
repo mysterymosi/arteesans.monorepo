@@ -19,3 +19,11 @@ export function formatRequestDate(iso: string | null | undefined): string {
 export function formatPersonName(firstName: string | null | undefined, lastName: string | null | undefined): string {
   return [firstName, lastName].filter(Boolean).join(" ") || "Artisan";
 }
+
+/** Human-readable distance, e.g. "450 m" or "1.2 km away". */
+export function formatDistance(meters: number | null | undefined, options?: { away?: boolean }): string {
+  if (meters == null) return "Nearby";
+  const suffix = options?.away ? " away" : "";
+  if (meters < 1000) return `${Math.round(meters)} m${suffix}`;
+  return `${(meters / 1000).toFixed(1)} km${suffix}`;
+}

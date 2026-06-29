@@ -23,7 +23,9 @@ export const routes = {
   },
   artisan: {
     home: "/(artisan)/(stack)",
+    address: "/(artisan)/(stack)/address",
     jobs: "/(artisan)/(stack)/jobs",
+    openRequests: "/(artisan)/(stack)/open-requests",
     chat: "/(artisan)/(stack)/chat",
     earnings: "/(artisan)/(stack)/earnings",
     profile: "/(artisan)/(stack)/profile",
@@ -92,9 +94,20 @@ export function customerBookingTrackingRoute(requestId: string): Href {
   } as unknown as Href;
 }
 
-export function customerBookingArtisanRoute(requestId: string): Href {
+export function customerBookingArtisanRoute(requestId: string, artisanId?: string): Href {
   return {
     pathname: "/(customer)/(stack)/booking/[id]/artisan",
+    params: artisanId ? { id: requestId, artisanId } : { id: requestId },
+  } as unknown as Href;
+}
+
+export function customerBookingArtisansRoute(requestId: string): Href {
+  return {
+    pathname: "/(customer)/(stack)/booking/[id]/artisans",
     params: { id: requestId },
   } as unknown as Href;
+}
+
+export function artisanOpenRequestsRoute(): Href {
+  return routes.artisan.openRequests;
 }

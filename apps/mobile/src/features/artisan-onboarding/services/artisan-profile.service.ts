@@ -26,6 +26,18 @@ export function formatArtisanAddressLabel(
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
+export function formatArtisanLocationLabel(
+  profile: Pick<ArtisanProfileRow, "address" | "city_lga" | "state"> | null | undefined,
+): string | null {
+  if (!profile) return null;
+
+  const parts = [profile.city_lga, profile.state].filter(Boolean);
+  if (parts.length > 0) return parts.join(", ");
+
+  const address = profile.address?.trim();
+  return address || null;
+}
+
 export async function fetchArtisanProfile(userId: string): Promise<ArtisanProfileRow | null> {
   const { data, error } = await supabase
     .from("artisan_profiles")

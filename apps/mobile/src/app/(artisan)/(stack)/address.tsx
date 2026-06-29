@@ -1,9 +1,9 @@
 import { router } from "expo-router";
 import { AddressPickerScreen } from "@/features/address";
-import { useSaveCustomerDefaultAddress } from "@/features/customer";
+import { useSaveArtisanProfileAddress } from "@/features/artisan";
 
-export default function CustomerAddressScreen() {
-  const saveAddress = useSaveCustomerDefaultAddress();
+export default function ArtisanAddressScreen() {
+  const saveAddress = useSaveArtisanProfileAddress();
 
   return (
     <AddressPickerScreen

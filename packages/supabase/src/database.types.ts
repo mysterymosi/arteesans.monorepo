@@ -248,6 +248,48 @@ export type Database = {
           },
         ]
       }
+      request_artisan_interests: {
+        Row: {
+          artisan_id: string
+          created_at: string
+          id: string
+          request_id: string
+          status: Database["public"]["Enums"]["request_interest_status"]
+          updated_at: string
+        }
+        Insert: {
+          artisan_id: string
+          created_at?: string
+          id?: string
+          request_id: string
+          status?: Database["public"]["Enums"]["request_interest_status"]
+          updated_at?: string
+        }
+        Update: {
+          artisan_id?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          status?: Database["public"]["Enums"]["request_interest_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_artisan_interests_artisan_id_fkey"
+            columns: ["artisan_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_artisan_interests_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_tokens: {
         Row: {
           created_at: string
@@ -522,6 +564,65 @@ export type Database = {
         Args: { p_request_id: string }
         Returns: Database["public"]["Enums"]["request_status"]
       }
+      decline_selected_job: {
+        Args: { p_reason?: string; p_request_id: string }
+        Returns: Database["public"]["Enums"]["request_status"]
+      }
+      express_interest: {
+        Args: { p_request_id: string }
+        Returns: Database["public"]["Enums"]["request_interest_status"]
+      }
+      is_artisan_eligible_for_request: {
+        Args: {
+          p_artisan_id: string
+          p_max_radius_meters?: number
+          p_request_id: string
+        }
+        Returns: boolean
+      }
+      list_open_requests_for_artisan: {
+        Args: { p_max_radius_meters?: number }
+        Returns: {
+          address: string
+          budget: number | null
+          category_id: string
+          category_name: string
+          category_slug: string
+          created_at: string
+          description: string
+          distance_meters: number | null
+          interest_status: Database["public"]["Enums"]["request_interest_status"] | null
+          preferred_time: string | null
+          request_id: string
+          score: number
+          urgency: Database["public"]["Enums"]["urgency_level"]
+        }[]
+      }
+      list_request_interests: {
+        Args: { p_request_id: string }
+        Returns: {
+          artisan_id: string
+          average_rating: number
+          city_lga: string | null
+          completed_jobs: number
+          created_at: string
+          distance_meters: number | null
+          first_name: string | null
+          interest_id: string
+          last_name: string | null
+          profile_photo_url: string | null
+          score: number
+          state: string | null
+        }[]
+      }
+      select_artisan: {
+        Args: { p_artisan_id: string; p_request_id: string }
+        Returns: Database["public"]["Enums"]["request_status"]
+      }
+      withdraw_interest: {
+        Args: { p_request_id: string }
+        Returns: Database["public"]["Enums"]["request_interest_status"]
+      }
       confirm_job_completion: {
         Args: { p_request_id: string }
         Returns: string
@@ -565,6 +666,12 @@ export type Database = {
         | "weekends_only"
         | "flexible"
         | "on_demand"
+      request_interest_status:
+        | "pending"
+        | "withdrawn"
+        | "selected"
+        | "declined"
+        | "expired"
       request_status:
         | "submitted"
         | "matching"
@@ -714,6 +821,13 @@ export const Constants = {
         "weekends_only",
         "flexible",
         "on_demand",
+      ],
+      request_interest_status: [
+        "pending",
+        "withdrawn",
+        "selected",
+        "declined",
+        "expired",
       ],
       request_status: [
         "submitted",

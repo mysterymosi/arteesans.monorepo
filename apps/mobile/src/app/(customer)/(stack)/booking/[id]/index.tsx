@@ -8,10 +8,12 @@ import {
   useConfirmJobCompletion,
   useCustomerRequest,
 } from "@/features/service-requests";
+import { useRequestInterests } from "@/features/open-requests";
 import { getUrgencyLabel } from "@/features/artisan-jobs/types/artisan-job";
 import { formatNaira, formatPersonName } from "@/lib/format";
 import {
   customerBookingArtisanRoute,
+  customerBookingArtisansRoute,
   customerBookingTrackingRoute,
   routes,
 } from "@/lib/routes";
@@ -19,6 +21,7 @@ import {
 export default function CustomerBookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: request, isLoading, isError } = useCustomerRequest(id);
+  const { data: interests = [] } = useRequestInterests(id);
   const confirmBooking = useConfirmBooking();
   const confirmCompletion = useConfirmJobCompletion();
 
@@ -59,6 +62,8 @@ export default function CustomerBookingDetailScreen() {
     ? formatPersonName(request.artisan.first_name, request.artisan.last_name)
     : null;
   const canConfirmBooking = request.status === "matched";
+  const isMarketplaceMatching = request.status === "matching";
+  const canChooseArtisan = isMarketplaceMatching && interests.length > 0;
   const canTrack = [
     "confirmed",
     "accepted",
@@ -129,6 +134,24 @@ export default function CustomerBookingDetailScreen() {
           />
         ) : null}
 
+        {isMarketplaceMatching ? (
+          <View className="rounded-2xl border border-primary/20 bg-primary-subtle px-4 py-3">
+            <Text className="font-medium text-sm text-primary">Finding artisans</Text>
+            <Text className="mt-1 text-sm text-ink-secondary">
+              {interests.length > 0
+                ? `${interests.length} artisan${interests.length === 1 ? "" : "s"} interested. Choose who you want for this job.`
+                : "Eligible artisans can express interest. You will be notified when someone applies."}
+            </Text>
+          </View>
+        ) : null}
+
+        {canChooseArtisan ? (
+          <Button
+            title="Choose artisan"
+            onPress={() => router.push(customerBookingArtisansRoute(request.id))}
+          />
+        ) : null}
+
         {request.status === "matched" ? (
           <View className="rounded-2xl border border-primary/20 bg-primary-subtle px-4 py-3">
             <Text className="font-medium text-sm text-primary">Artisan matched</Text>
@@ -172,7 +195,7 @@ export default function CustomerBookingDetailScreen() {
           </View>
         ) : null}
 
-        {request.status !== "matched" ? (
+        {request.artisan ? (
           <Button title="Call artisan" variant="secondary" onPress={handleCall} />
         ) : null}
       </ScrollView>
