@@ -53,6 +53,7 @@ export default function CustomerBookingTrackScreen() {
       : request.status;
   const showPreAcceptance =
     request.status === "matched" || request.status === "confirmed";
+  const showMarketplaceMatching = request.status === "matching";
 
   const handleConfirmCompletion = async () => {
     try {
@@ -83,7 +84,14 @@ export default function CustomerBookingTrackScreen() {
           </Text>
         </View>
 
-        {showPreAcceptance ? (
+        {showMarketplaceMatching ? (
+          <View className="rounded-2xl border border-line bg-surface-muted px-4 py-3">
+            <Text className="font-medium text-sm text-ink">Waiting for your artisan</Text>
+            <Text className="mt-1 text-sm text-ink-secondary">
+              Review interested artisans from booking details and choose who you want for this job.
+            </Text>
+          </View>
+        ) : showPreAcceptance ? (
           <View className="rounded-2xl border border-line bg-surface-muted px-4 py-3">
             <Text className="font-medium text-sm text-ink">
               {request.status === "matched"

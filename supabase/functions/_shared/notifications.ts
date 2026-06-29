@@ -40,3 +40,19 @@ export function buildJobReassignedPush(requestId: string) {
     data: { type: "job_reassigned", entity_id: requestId },
   };
 }
+
+export function buildRequestInterestReceivedPush(requestId: string) {
+  return {
+    title: "New artisan interest",
+    body: "An artisan is interested in your service request. Review and choose your artisan.",
+    data: { type: "request_interest_received", entity_id: requestId },
+  };
+}
+
+export function buildArtisanSelectedPush(requestId: string) {
+  return {
+    title: "You were selected",
+    body: "A customer chose you for their job. Open the app to get started.",
+    data: { type: "artisan_selected", entity_id: requestId },
+  };
+}

@@ -8,6 +8,7 @@ import {
   useArtisanJob,
   useRejectJob,
 } from "@/features/artisan-jobs";
+import { useDeclineSelectedJob } from "@/features/open-requests";
 import { getUrgencyLabel } from "@/features/artisan-jobs/types/artisan-job";
 import { formatNaira, formatPersonName } from "@/lib/format";
 import { artisanJobCompleteRoute, artisanJobTrackingRoute } from "@/lib/routes";
@@ -18,6 +19,7 @@ export default function ArtisanJobDetailScreen() {
   const { data: job, isLoading, isError } = useArtisanJob(id);
   const acceptJob = useAcceptJob();
   const rejectJob = useRejectJob();
+  const declineSelectedJob = useDeclineSelectedJob();
 
   const minutesRemaining = useMemo(() => {
     if (!job?.accept_deadline_at) return null;
@@ -58,6 +60,7 @@ export default function ArtisanJobDetailScreen() {
   const categorySlug = job.category?.slug ?? "general-repairs";
   const customerName = formatPersonName(job.customer?.first_name, job.customer?.last_name);
   const canAccept = job.status === "confirmed";
+  const canDeclineSelected = job.status === "accepted";
   const canTrack = ["accepted", "on_the_way", "arrived", "in_progress"].includes(job.status);
 
   const handleAccept = async () => {
@@ -70,6 +73,27 @@ export default function ArtisanJobDetailScreen() {
         error instanceof Error ? error.message : "Please try again.",
       );
     }
+  };
+
+  const handleDeclineSelected = () => {
+    Alert.alert("Decline job?", "This request will return to matching for the customer.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Decline",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await declineSelectedJob.mutateAsync({ requestId: job.id });
+            router.back();
+          } catch (error) {
+            Alert.alert(
+              "Could not decline job",
+              error instanceof Error ? error.message : "Please try again.",
+            );
+          }
+        },
+      },
+    ]);
   };
 
   const handleReject = () => {
@@ -154,6 +178,15 @@ export default function ArtisanJobDetailScreen() {
               onPress={handleReject}
             />
           </View>
+        ) : null}
+
+        {canDeclineSelected ? (
+          <Button
+            title="Decline job"
+            variant="outline"
+            loading={declineSelectedJob.isPending}
+            onPress={handleDeclineSelected}
+          />
         ) : null}
 
         {canTrack ? (

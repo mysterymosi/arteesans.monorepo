@@ -13,6 +13,7 @@ export {
   useRejectJob,
   useUpdateJobStatus,
 } from "./hooks/use-artisan-jobs";
+export { useArtisanJobsRealtime } from "./hooks/use-artisan-jobs-realtime";
 export { IncomingJobCard, ArtisanJobRow } from "./components/incoming-job-card";
 export { JobStatusStepper } from "./components/job-status-stepper";
 export {

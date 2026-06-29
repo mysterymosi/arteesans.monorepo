@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -12,18 +11,15 @@ import {
   useArtisanJobs,
   useRejectJob,
 } from "@/features/artisan-jobs";
+import { useOpenRequests } from "@/features/open-requests";
 import { icons } from "@/constants/icons";
-import { artisanJobRoute, routes } from "@/lib/routes";
-import { supabase } from "@/lib/supabase";
+import { artisanJobRoute, artisanOpenRequestsRoute, routes } from "@/lib/routes";
 import { cn } from "@/lib/cn";
 import type { VerificationStatus } from "@arteesans/shared";
-import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query-keys";
-import { useAuthSession } from "@/providers/auth-provider";
 
 type ArtisanHomeDashboardProps = {
   firstName: string;
-  city?: string | null;
+  locationLabel: string;
   verificationStatus: VerificationStatus;
 };
 
@@ -56,42 +52,14 @@ function StatCard({
 /** Artisan home dashboard — Figma 36:2476 */
 export function ArtisanHomeDashboard({
   firstName,
-  city,
+  locationLabel,
   verificationStatus,
 }: ArtisanHomeDashboardProps) {
   const isApproved = verificationStatus === "approved";
   const greeting = firstName ? `Hello ${firstName},` : "Hello,";
-  const { session } = useAuthSession();
-  const queryClient = useQueryClient();
   const { data: jobs = [] } = useArtisanJobs();
+  const { data: openRequests = [] } = useOpenRequests();
   const rejectJob = useRejectJob();
-
-  useEffect(() => {
-    const userId = session?.user.id;
-    if (!userId) return;
-
-    const channel = supabase
-      .channel(`artisan-jobs:${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "service_requests",
-          filter: `assigned_artisan_id=eq.${userId}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({
-            queryKey: queryKeys.artisanJobs.list(userId),
-          });
-        },
-      )
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(channel);
-    };
-  }, [queryClient, session?.user.id]);
 
   const incomingJob = jobs.find(isIncomingAcceptanceJob);
   const recentJobs = jobs
@@ -151,10 +119,22 @@ export function ArtisanHomeDashboard({
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="font-medium text-2xl text-ink">{greeting}</Text>
-            <View className="mt-1 flex-row items-center gap-1">
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel="Update your location"
+              onPress={() => router.push(routes.artisan.address)}
+              className="mt-1 min-w-0 flex-row items-center gap-1 active:opacity-75"
+            >
               <Image source={icons.location} style={{ width: 20, height: 20 }} contentFit="contain" />
-              <Text className="text-base text-ink-secondary">{city ?? "Location"}</Text>
-            </View>
+              <Text
+                className="min-w-0 text-base text-ink-secondary"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {locationLabel}
+              </Text>
+              <Image source={icons.chevronDown} style={{ width: 12, height: 12 }} contentFit="contain" />
+            </Pressable>
           </View>
           <View className="flex-row items-center gap-1 rounded-full border border-success/40 bg-success-subtle px-2.5 py-1">
             <View className="h-3 w-3 rounded-full bg-success" />
@@ -188,6 +168,19 @@ export function ArtisanHomeDashboard({
 
       {isApproved ? (
         <>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(artisanOpenRequestsRoute())}
+            className="rounded-2xl border border-primary/20 bg-primary-subtle px-4 py-4"
+          >
+            <Text className="font-medium text-base text-primary">Open requests near you</Text>
+            <Text className="mt-1 text-sm text-ink-secondary">
+              {openRequests.length > 0
+                ? `${openRequests.length} matching request${openRequests.length === 1 ? "" : "s"} available`
+                : "Browse new customer requests in your skill area"}
+            </Text>
+          </Pressable>
+
           {incomingJob ? (
             <View className="gap-5">
               <View className="flex-row items-center justify-between">
@@ -221,7 +214,7 @@ export function ArtisanHomeDashboard({
             ) : (
               <View className="rounded-2xl border border-line bg-surface-muted px-4 py-6">
                 <Text className="text-center text-sm text-ink-secondary">
-                  No active jobs yet. New matches will appear here.
+                  No active jobs yet. Browse open requests to express interest.
                 </Text>
               </View>
             )}

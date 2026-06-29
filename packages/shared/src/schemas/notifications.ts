@@ -8,6 +8,8 @@ export const pushNotificationTypes = [
   "job_acceptance_required",
   "job_status_updated",
   "job_reassigned",
+  "request_interest_received",
+  "artisan_selected",
   "artisan_application",
   "verification_approved",
   "verification_rejected",
@@ -35,6 +37,14 @@ export const pushNotificationDataSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("job_reassigned"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("request_interest_received"),
+    entity_id: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal("artisan_selected"),
     entity_id: z.string().uuid(),
   }),
   z.object({
@@ -114,6 +124,24 @@ export function buildJobReassignedPush(requestId: string): Omit<SendPushInput, "
     title: "Job needs rematch",
     body: "A service request was returned to matching and needs a new artisan.",
     data: { type: "job_reassigned", entity_id: requestId },
+  };
+}
+
+export function buildRequestInterestReceivedPush(
+  requestId: string,
+): Omit<SendPushInput, "user_ids"> {
+  return {
+    title: "New artisan interest",
+    body: "An artisan is interested in your service request. Review and choose your artisan.",
+    data: { type: "request_interest_received", entity_id: requestId },
+  };
+}
+
+export function buildArtisanSelectedPush(requestId: string): Omit<SendPushInput, "user_ids"> {
+  return {
+    title: "You were selected",
+    body: "A customer chose you for their job. Open the app to get started.",
+    data: { type: "artisan_selected", entity_id: requestId },
   };
 }
 

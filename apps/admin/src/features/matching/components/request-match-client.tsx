@@ -40,7 +40,7 @@ function RequestSummary({ request }: { request: ServiceRequestDetail }) {
             <RequestUrgencyBadge urgency={request.urgency} />
           </div>
           <h1 className="mt-3 text-2xl font-semibold leading-tight">
-            Match artisan for {request.categoryName}
+            Admin override for {request.categoryName}
           </h1>
           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
             <span>Customer: {request.customerName}</span>
@@ -132,6 +132,14 @@ export function RequestMatchClient({
         Request detail
       </DetailBackButton>
       <RequestSummary request={request} />
+
+      <Alert>
+        <AlertTitle>Emergency override only</AlertTitle>
+        <AlertDescription>
+          Customers and artisans normally match through the marketplace. Use this flow only when
+          manual assignment is required.
+        </AlertDescription>
+      </Alert>
 
       {suggestionsQuery.isError ? (
         <Alert variant="destructive">
